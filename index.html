@@ -15,16 +15,126 @@
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
-    "@google/genai": "https://esm.sh/@google/genai"
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/"
   }
 }
 </script>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="index.jsx"></script>
+
+  <!-- Setup Screen -->
+  <main id="setup-screen" class="screen active">
+    <div class="container">
+      <h1>Wort-Jäger: Setup</h1>
+      <p>Gib deine Wortliste hier ein. Trenne die Wörter durch Kommas oder Zeilenumbrüche.</p>
+      
+      <textarea id="word-input-area" class="word-input-area" placeholder="Apfel, Banane, Kirsche..."></textarea>
+
+      <div class="settings-box">
+          <h2>Einstellungen</h2>
+          <div class="setting-item">
+              <label id="game-mode-label">Spielmodus</label>
+              <div id="game-mode-selector" class="range-selector" role="radiogroup" aria-labelledby="game-mode-label">
+                  <button data-mode="cloud" role="radio" aria-checked="true" class="range-button active">Wortwolke</button>
+                  <button data-mode="reader" role="radio" aria-checked="false" class="range-button">Lesemodus</button>
+              </div>
+          </div>
+          
+          <div id="cloud-settings">
+              <div class="setting-item">
+                  <label id="word-count-label">Wörter auf dem Schirm</label>
+                  <div id="word-count-selector" class="range-selector" role="radiogroup" aria-labelledby="word-count-label">
+                      <button data-range="2-5" role="radio" aria-checked="false" class="range-button">2-5</button>
+                      <button data-range="5-10" role="radio" aria-checked="true" class="range-button active">5-10</button>
+                      <button data-range="10-15" role="radio" aria-checked="false" class="range-button">10-15</button>
+                      <button data-range="15-20" role="radio" aria-checked="false" class="range-button">15-20</button>
+                  </div>
+              </div>
+              <div class="setting-item">
+                <label for="duration-select">Sichtbarkeitsdauer</label>
+                <select id="duration-select" class="settings-select">
+                    <option value="2000">2.0s</option>
+                    <option value="2500">2.5s</option>
+                    <option value="3000" selected>3.0s</option>
+                    <option value="3500">3.5s</option>
+                    <option value="4000">4.0s</option>
+                    <option value="4500">4.5s</option>
+                    <option value="5000">5.0s</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <label for="move-toggle">Wörter animieren</label>
+                <label class="toggle-switch">
+                    <input id="move-toggle" type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+              </div>
+          </div>
+
+          <div id="reader-settings" style="display: none;">
+              <div class="setting-item">
+                  <label>Laufgeschwindigkeit</label>
+                  <div id="reader-speed-controller" class="speed-controller">
+                    <button class="speed-button" aria-label="Langsamer" data-action="slower">-</button>
+                    <span class="speed-display" aria-live="polite" aria-atomic="true">5</span>
+                    <button class="speed-button" aria-label="Schneller" data-action="faster">+</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="button-group">
+          <button id="start-game-button" class="primary-button">
+            Wortliste verwenden
+          </button>
+          <button id="fullscreen-button-setup" class="secondary-button">
+              Vollbild aktivieren
+          </button>
+      </div>
+      <p id="error-message" role="alert" class="error-message" style="display: none;"></p>
+    </div>
+  </main>
+  
+  <!-- Game Screen -->
+  <main id="game-screen" class="screen">
+      <header class="game-header">
+        <div class="game-hud">
+            <div class="game-stats" aria-live="polite">
+                <span id="level-display">Level: 1</span>
+                <span id="hits-display">Treffer: 0 / 10</span>
+            </div>
+            <div id="reader-hud-controls" class="in-game-controls">
+                <span id="hud-target-word-reader" class="hud-target-word">Finde: ...</span>
+                <div class="speed-controller-wrapper">
+                    <label>Geschwindigkeit</label>
+                    <div id="in-game-speed-controller" class="speed-controller">
+                      <button class="speed-button" aria-label="Langsamer" data-action="slower">-</button>
+                      <span class="speed-display" aria-live="polite" aria-atomic="true">5</span>
+                      <button class="speed-button" aria-label="Schneller" data-action="faster">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="hud-actions">
+                <button id="quit-button" class="quit-button">Beenden</button>
+                <button id="fullscreen-button-game" class="fullscreen-button" aria-label="Vollbild umschalten">Vollbild</button>
+            </div>
+        </div>
+      </header>
+      <div id="game-area" class="game-area">
+        <div id="cloud-target-word-display" class="target-word-display" aria-live="polite" aria-atomic="true">...</div>
+        <div id="reader-track" class="reader-track"></div>
+      </div>
+  </main>
+  
+  <!-- Game Over Screen -->
+  <main id="game-over-screen" class="screen">
+    <div class="game-over-overlay" role="dialog" aria-labelledby="gameOverHeading">
+        <h1 id="gameOverHeading">Spiel vorbei!</h1>
+        <p>Du hast alle Wörter der Liste gefunden!</p>
+        <button id="play-again-button" class="primary-button">Zurück zum Setup</button>
+    </div>
+  </main>
+
+  <script src="index.js"></script>
 </body>
 </html>
