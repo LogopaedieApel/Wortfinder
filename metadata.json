@@ -1,0 +1,6 @@
+{
+  "name": "Wort-Jäger",
+  "description": "Ein interaktives Wortspiel, um das Lesevermögen und die Reflexe zu trainieren. Konfiguriere dein Spiel, gib eine Wortliste ein und jage die richtigen Wörter!",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
