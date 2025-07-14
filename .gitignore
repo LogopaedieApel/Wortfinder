@@ -1,0 +1,13 @@
+# Umgebungsvariablen - NIEMALS HOCHLADEN!
+.env
+.env.*
+!.env.example
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
+
+# Build-Artefakte & Abhängigkeiten (falls du später npm hinzufügst)
+/node_modules
+/dist
+npm-debug.log
