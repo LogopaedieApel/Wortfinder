@@ -1,132 +1,763 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wort-Jäger</title>
-  <link rel="stylesheet" href="index.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0d0221">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wortfinderr</title>
+    <style>
+        /* --- GRUNDLAGEN & LAYOUT --- */
+        :root {
+            --primary-color: #FF8C00; /* Leuchtendes Orange */
+            --background-color: #1a1a1a;
+            --container-bg-color: #2b2b2b;
+            --text-color: #f0f0f0;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --border-color: #444;
+            --button-bg: #333;
+            --button-hover-bg: #555;
+            --active-bg: var(--primary-color);
+            --active-text: #000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow: hidden; /* Verhindert Scrollen im Hauptfenster */
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            font-size: 2.5em;
+        }
+
+        /* --- SETUP-BILDSCHIRM --- */
+        #setup-screen .container {
+            background-color: var(--container-bg-color);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        #word-list {
+            width: 100%;
+            height: 150px;
+            background-color: #1e1e1e;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+
+        .settings-box {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .settings-box h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: var(--primary-color);
+        }
+
+        .settings-group {
+            margin-bottom: 15px;
+        }
+
+        .settings-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .btn-group button, .btn-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-group button:first-child { border-radius: 5px 0 0 5px; }
+        .btn-group button:last-child { border-radius: 0 5px 5px 0; }
+        .btn-group button:not(:last-child) { border-right: none; }
+        .btn-group button:hover { background-color: var(--button-hover-bg); }
+        .btn-group button.active {
+            background-color: var(--active-bg);
+            color: var(--active-text);
+            font-weight: bold;
+        }
+
+        #conditional-settings .setting-block { display: none; }
+        #conditional-settings .setting-block.active { display: block; }
+
+        select {
+            padding: 8px;
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        
+        /* Toggle Switch für Animation */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px; width: 26px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Geschwindigkeitsregler */
+        .speed-control {
+            display: flex;
+            align-items: center;
+        }
+        .speed-control button {
+            width: 40px;
+            height: 40px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        #speed-value {
+            font-size: 1.5em;
+            margin: 0 15px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+
+        .btn-primary {
+            flex-grow: 1;
+            background-color: var(--primary-color);
+            color: var(--active-text);
+        }
+
+        .btn-secondary {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+        }
+
+        #error-message {
+            color: var(--error-color);
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* --- SPIEL-BILDSCHIRM --- */
+        #game-screen {
+            justify-content: flex-start; /* HUD oben */
+        }
+        #game-hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #game-stats, #game-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        #game-stats span { font-size: 1.2em; }
+        #target-word-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        #game-area {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin-top: 60px; /* Platz für HUD */
+        }
+
+        .game-word {
+            position: absolute;
+            padding: 8px 15px;
+            background-color: rgba(43, 43, 43, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 1.5em;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .game-word:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+        }
+        
+        /* Modus-spezifisches Wort-Styling */
+        .word-cloud-target {
+            font-size: 3em;
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: transparent;
+            border: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .scrolling-word {
+            display: inline-block;
+            margin: 0 50px; /* Abstand zwischen den Wörtern in der Zeile */
+            white-space: nowrap;
+            padding: 8px 15px;
+            font-size: 2em;
+            cursor: pointer;
+        }
+        .scrolling-word:hover { transform: scale(1.1); }
+        #scrolling-words-container {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            will-change: transform;
+        }
+        
+        /* Animationen & Feedback */
+        .fade-out { animation: fade-out-anim forwards; }
+        @keyframes fade-out-anim {
+            to { opacity: 0; transform: scale(0.5); }
+        }
+
+        .correct { background-color: var(--success-color) !important; color: white !important; }
+        .incorrect { background-color: var(--error-color) !important; color: white !important; }
+        
+        .shake { animation: shake-anim 0.5s; }
+        @keyframes shake-anim {
+            10%, 90% { transform: translateX(-3px); }
+            20%, 80% { transform: translateX(3px); }
+            30%, 50%, 70% { transform: translateX(-3px); }
+            40%, 60% { transform: translateX(3px); }
+        }
+
+        .animate-float { animation: float-anim 6s ease-in-out infinite; }
+        @keyframes float-anim {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(5px, 10px); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        @keyframes scroll-left {
+            from { transform: translateX(0%); }
+            to { transform: translateX(-50%); } /* Scrollt genau die Hälfte der Breite */
+        }
+        
+        /* SPIELENDE-BILDSCHIRM */
+        #game-over-screen h1 { font-size: 3em; }
+
+    </style>
 </head>
 <body>
 
-  <!-- Setup Screen -->
-  <main id="setup-screen" class="screen active">
-    <div class="container">
-      <h1>Wort-Jäger: Setup</h1>
-      <p>Gib deine Wortliste hier ein. Trenne die Wörter durch Kommas oder Zeilenumbrüche.</p>
-      
-      <textarea id="word-input-area" class="word-input-area" placeholder="Apfel, Banane, Kirsche..."></textarea>
+    <!-- ======================================================= -->
+    <!-- SETUP-BILDSCHIRM                                        -->
+    <!-- ======================================================= -->
+    <div id="setup-screen" class="screen active">
+        <div class="container">
+            <h1>Wortfinderr: Setup</h1>
+            <textarea id="word-list" placeholder="Apfel, Banane, Kirsche, Dattel, Erdbeere, Feige, Grapefruit"></textarea>
 
-      <div class="settings-box">
-          <h2>Einstellungen</h2>
-          <div class="setting-item">
-              <label id="game-mode-label">Spielmodus</label>
-              <div id="game-mode-selector" class="range-selector" role="radiogroup" aria-labelledby="game-mode-label">
-                  <button data-mode="cloud" role="radio" aria-checked="true" class="range-button active">Wortwolke</button>
-                  <button data-mode="reader" role="radio" aria-checked="false" class="range-button">Lesemodus</button>
-              </div>
-          </div>
-          
-          <div id="cloud-settings">
-              <div class="setting-item">
-                  <label id="word-count-label">Wörter auf dem Schirm</label>
-                  <div id="word-count-selector" class="range-selector" role="radiogroup" aria-labelledby="word-count-label">
-                      <button data-range="2-5" role="radio" aria-checked="false" class="range-button">2-5</button>
-                      <button data-range="5-10" role="radio" aria-checked="true" class="range-button active">5-10</button>
-                      <button data-range="10-15" role="radio" aria-checked="false" class="range-button">10-15</button>
-                      <button data-range="15-20" role="radio" aria-checked="false" class="range-button">15-20</button>
-                  </div>
-              </div>
-              <div class="setting-item">
-                <label for="duration-select">Sichtbarkeitsdauer</label>
-                <select id="duration-select" class="settings-select">
-                    <option value="2000">2.0s</option>
-                    <option value="2500">2.5s</option>
-                    <option value="3000" selected>3.0s</option>
-                    <option value="3500">3.5s</option>
-                    <option value="4000">4.0s</option>
-                    <option value="4500">4.5s</option>
-                    <option value="5000">5.0s</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <label for="move-toggle">Wörter animieren</label>
-                <label class="toggle-switch">
-                    <input id="move-toggle" type="checkbox" checked>
-                    <span class="slider"></span>
-                </label>
-              </div>
-          </div>
+            <div class="settings-box">
+                <h2>Einstellungen</h2>
+                
+                <div class="settings-group">
+                    <label>Spielmodus</label>
+                    <div class="btn-group">
+                        <button id="mode-wordcloud" class="active">Wortwolke</button>
+                        <button id="mode-reading">Lesemodus</button>
+                    </div>
+                </div>
 
-          <div id="reader-settings" style="display: none;">
-              <div class="setting-item">
-                  <label>Laufgeschwindigkeit</label>
-                  <div id="reader-speed-controller" class="speed-controller">
-                    <button class="speed-button" aria-label="Langsamer" data-action="slower">-</button>
-                    <span class="speed-display" aria-live="polite" aria-atomic="true">5</span>
-                    <button class="speed-button" aria-label="Schneller" data-action="faster">+</button>
-                  </div>
-              </div>
-          </div>
-      </div>
-      <div class="button-group">
-          <button id="start-game-button" class="primary-button">
-            Wortliste verwenden
-          </button>
-          <button id="fullscreen-button-setup" class="secondary-button">
-              Vollbild aktivieren
-          </button>
-      </div>
-      <p id="error-message" role="alert" class="error-message" style="display: none;"></p>
-    </div>
-  </main>
-  
-  <!-- Game Screen -->
-  <main id="game-screen" class="screen">
-      <header class="game-header">
-        <div class="game-hud">
-            <div class="game-stats" aria-live="polite">
-                <span id="level-display">Level: 1</span>
-                <span id="hits-display">Treffer: 0 / 10</span>
-            </div>
-            <div id="reader-hud-controls" class="in-game-controls">
-                <span id="hud-target-word-reader" class="hud-target-word">Finde: ...</span>
-                <div class="speed-controller-wrapper">
-                    <label>Geschwindigkeit</label>
-                    <div id="in-game-speed-controller" class="speed-controller">
-                      <button class="speed-button" aria-label="Langsamer" data-action="slower">-</button>
-                      <span class="speed-display" aria-live="polite" aria-atomic="true">5</span>
-                      <button class="speed-button" aria-label="Schneller" data-action="faster">+</button>
+                <div id="conditional-settings">
+                    <!-- Einstellungen für Wortwolke -->
+                    <div id="wordcloud-settings" class="setting-block active">
+                        <div class="settings-group">
+                            <label>Wörter auf dem Schirm</label>
+                            <div id="word-count-group" class="btn-group">
+                                <button data-value="2-5">2-5</button>
+                                <button data-value="5-10" class="active">5-10</button>
+                                <button data-value="10-15">10-15</button>
+                                <button data-value="15-20">15-20</button>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <label for="visibility-duration">Sichtbarkeitsdauer</label>
+                            <select id="visibility-duration">
+                                <option value="2000">2.0s</option>
+                                <option value="2500">2.5s</option>
+                                <option value="3000" selected>3.0s</option>
+                                <option value="3500">3.5s</option>
+                                <option value="4000">4.0s</option>
+                                <option value="4500">4.5s</option>
+                                <option value="5000">5.0s</option>
+                            </select>
+                        </div>
+                        <div class="settings-group">
+                            <label for="animate-words-toggle">Wörter animieren</label>
+                            <label class="switch">
+                                <input type="checkbox" id="animate-words-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Einstellungen für Lesemodus -->
+                    <div id="reading-mode-settings" class="setting-block">
+                        <div class="settings-group">
+                            <label>Laufgeschwindigkeit</label>
+                            <div class="speed-control">
+                                <button id="speed-decrease" class="btn-secondary">-</button>
+                                <span id="speed-value">5</span>
+                                <button id="speed-increase" class="btn-secondary">+</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="hud-actions">
-                <button id="quit-button" class="quit-button">Beenden</button>
-                <button id="fullscreen-button-game" class="fullscreen-button" aria-label="Vollbild umschalten">Vollbild</button>
+
+            <div class="action-buttons">
+                <button id="start-game-btn" class="btn btn-primary">Wortliste verwenden</button>
+                <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button>
+            </div>
+            <p id="error-message">Bitte gib mindestens 5 einzigartige Wörter ein.</p>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SPIEL-BILDSCHIRM                                        -->
+    <!-- ======================================================= -->
+    <div id="game-screen" class="screen">
+        <div id="game-hud">
+            <div id="game-stats">
+                <span id="level-display">Level: 1</span>
+                <span id="hits-display">Treffer: 0 / 10</span>
+            </div>
+            <div id="target-word-display"></div>
+            <div id="game-actions">
+                <button id="exit-game-btn" class="btn btn-secondary">Beenden</button>
+                <button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button>
             </div>
         </div>
-      </header>
-      <div id="game-area" class="game-area">
-        <div id="cloud-target-word-display" class="target-word-display" aria-live="polite" aria-atomic="true">...</div>
-        <div id="reader-track" class="reader-track"></div>
-      </div>
-  </main>
-  
-  <!-- Game Over Screen -->
-  <main id="game-over-screen" class="screen">
-    <div class="game-over-overlay" role="dialog" aria-labelledby="gameOverHeading">
-        <h1 id="gameOverHeading">Spiel vorbei!</h1>
-        <p>Du hast alle Wörter der Liste gefunden!</p>
-        <button id="play-again-button" class="primary-button">Zurück zum Setup</button>
+        <div id="game-area">
+            <!-- Wörter werden hier dynamisch eingefügt -->
+        </div>
     </div>
-  </main>
 
-  <script src="index.js"></script>
+    <!-- ======================================================= -->
+    <!-- SPIELENDE-BILDSCHIRM                                    -->
+    <!-- ======================================================= -->
+    <div id="game-over-screen" class="screen">
+        <h1>Spiel vorbei!</h1>
+        <p>Du hast alle Wörter gemeistert.</p>
+        <button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM ELEMENTE ---
+        const screens = {
+            setup: document.getElementById('setup-screen'),
+            game: document.getElementById('game-screen'),
+            gameOver: document.getElementById('game-over-screen'),
+        };
+
+        const setup = {
+            wordListInput: document.getElementById('word-list'),
+            modeWordCloudBtn: document.getElementById('mode-wordcloud'),
+            modeReadingBtn: document.getElementById('mode-reading'),
+            wordCloudSettings: document.getElementById('wordcloud-settings'),
+            readingModeSettings: document.getElementById('reading-mode-settings'),
+            wordCountGroup: document.getElementById('word-count-group'),
+            visibilityDuration: document.getElementById('visibility-duration'),
+            animateWordsToggle: document.getElementById('animate-words-toggle'),
+            speedDecreaseBtn: document.getElementById('speed-decrease'),
+            speedIncreaseBtn: document.getElementById('speed-increase'),
+            speedValue: document.getElementById('speed-value'),
+            startGameBtn: document.getElementById('start-game-btn'),
+            errorMessage: document.getElementById('error-message'),
+        };
+
+        const game = {
+            hud: document.getElementById('game-hud'),
+            levelDisplay: document.getElementById('level-display'),
+            hitsDisplay: document.getElementById('hits-display'),
+            targetWordDisplay: document.getElementById('target-word-display'),
+            area: document.getElementById('game-area'),
+            exitBtn: document.getElementById('exit-game-btn'),
+        };
+        
+        const gameOver = {
+            restartBtn: document.getElementById('restart-btn'),
+        };
+
+        const fullscreenBtns = [document.getElementById('fullscreen-btn'), document.getElementById('fullscreen-btn-game')];
+
+
+        // --- SPIELSTATUS & EINSTELLUNGEN ---
+        let state = {
+            gameMode: 'wordcloud', // 'wordcloud' or 'reading'
+            wordCount: [5, 10], // [min, max]
+            visibilityDuration: 3000,
+            animateWords: true,
+            readingSpeed: 5,
+            
+            wordList: [],
+            usedTargetWords: [],
+            targetWord: null,
+            level: 1,
+            hits: 0,
+            hitsNeeded: 10,
+            
+            gameInterval: null,
+        };
+
+        // --- FUNKTIONEN ---
+        
+        // Bildschirmwechsel
+        function showScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+        
+        // Vollbild-Funktionalität
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Fehler beim Aktivieren des Vollbildmodus: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Setup-Logik
+        function updateSetupUI() {
+            // Spielmodus
+            setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
+            setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
+            setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud');
+            setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading');
+
+            // Wortanzahl
+            document.querySelectorAll('#word-count-group button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === state.wordCount.join('-'));
+            });
+            
+            // Lesegeschwindigkeit
+            setup.speedValue.textContent = state.readingSpeed;
+        }
+
+        // Spielstart
+        function startGame() {
+            const rawWords = setup.wordListInput.value.split(/[\n,]/);
+            const uniqueWords = [...new Set(rawWords.map(w => w.trim()).filter(w => w.length > 0))];
+
+            if (uniqueWords.length < 5) {
+                setup.errorMessage.style.display = 'block';
+                return;
+            }
+
+            setup.errorMessage.style.display = 'none';
+            state.wordList = uniqueWords;
+            state.level = 1;
+            state.hits = 0;
+            state.usedTargetWords = [];
+
+            showScreen('game');
+            startLevel();
+        }
+        
+        // Levelstart
+        function startLevel() {
+            // Spielende-Bedingung
+            if(state.usedTargetWords.length >= state.wordList.length) {
+                endGame();
+                return;
+            }
+
+            // Neues Zielwort auswählen
+            let availableWords = state.wordList.filter(w => !state.usedTargetWords.includes(w));
+            state.targetWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+            state.usedTargetWords.push(state.targetWord);
+            
+            state.hits = 0;
+            updateHUD();
+            
+            // Spiel-Loop starten
+            game.area.innerHTML = ''; // Spielfeld leeren
+            clearInterval(state.gameInterval);
+
+            if (state.gameMode === 'wordcloud') {
+                startWordCloudMode();
+            } else {
+                startReadingMode();
+            }
+        }
+
+        function updateHUD() {
+            game.levelDisplay.textContent = `Level: ${state.level}`;
+            game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
+            game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`;
+        }
+        
+        // --- WORTWOLKEN-MODUS LOGIK ---
+        
+        function startWordCloudMode() {
+            // Zielwort in der Mitte anzeigen
+            const targetEl = document.createElement('div');
+            targetEl.textContent = state.targetWord;
+            targetEl.classList.add('word-cloud-target');
+            game.area.appendChild(targetEl);
+            
+            // Wörter spawnen
+            const spawnInterval = (state.visibilityDuration / (state.wordCount[1] / 2));
+            state.gameInterval = setInterval(spawnWord, spawnInterval);
+        }
+        
+        function spawnWord() {
+            if (document.hidden) return; // Nicht spawnen, wenn Tab inaktiv ist
+            
+            const word = state.wordList[Math.floor(Math.random() * state.wordList.length)];
+            const el = document.createElement('div');
+            el.textContent = word;
+            el.classList.add('game-word');
+            
+            if (state.animateWords) {
+                el.classList.add('animate-float');
+                el.style.animationDuration = `${Math.random() * 4 + 4}s`;
+            }
+
+            const areaRect = game.area.getBoundingClientRect();
+            el.style.top = `${Math.random() * (areaRect.height - 80)}px`;
+            el.style.left = `${Math.random() * (areaRect.width - 150)}px`;
+            
+            el.addEventListener('click', handleWordClick);
+            
+            game.area.appendChild(el);
+            
+            // Wort nach Sichtbarkeitsdauer entfernen
+            setTimeout(() => {
+                if (el.parentElement) {
+                    el.classList.add('fade-out');
+                    setTimeout(() => el.remove(), 300);
+                }
+            }, state.visibilityDuration - 300);
+        }
+
+        // --- LESEMODUS LOGIK ---
+        
+        function startReadingMode() {
+            const container = document.createElement('div');
+            container.id = 'scrolling-words-container';
+            
+            let wordsToScroll = [];
+            // Wortliste mehrfach mischen, um eine lange Scroll-Leiste zu erzeugen
+            for(let i = 0; i < 5; i++) {
+                wordsToScroll.push(...[...state.wordList].sort(() => Math.random() - 0.5));
+            }
+            
+            // Zweite Hälfte für nahtloses Looping anhängen
+            wordsToScroll.push(...wordsToScroll);
+
+            wordsToScroll.forEach(word => {
+                const el = document.createElement('span');
+                el.textContent = word;
+                el.classList.add('game-word', 'scrolling-word');
+                el.addEventListener('click', handleWordClick);
+                container.appendChild(el);
+            });
+            
+            game.area.appendChild(container);
+            
+            // Animationsdauer basierend auf Geschwindigkeit berechnen
+            const containerWidth = container.offsetWidth;
+            const duration = containerWidth / (state.readingSpeed * 10);
+            container.style.animation = `scroll-left ${duration}s linear infinite`;
+        }
+        
+
+        // --- ALLGEMEINE SPIELINTERAKTION ---
+        
+        function handleWordClick(e) {
+            const clickedWord = e.target.textContent;
+            const el = e.target;
+            
+            // Klick-Listener entfernen, um Doppel-Klicks zu vermeiden
+            el.style.pointerEvents = 'none';
+
+            if (clickedWord === state.targetWord) {
+                // Richtig
+                state.hits++;
+                el.classList.add('correct');
+                updateHUD();
+                
+                if (state.hits >= state.hitsNeeded) {
+                    state.level++;
+                    setTimeout(startLevel, 1000); // Kurze Pause vor nächstem Level
+                }
+            } else {
+                // Falsch
+                el.classList.add('incorrect', 'shake');
+            }
+            
+            // Wort nach kurzem Feedback entfernen
+            setTimeout(() => {
+                el.classList.add('fade-out');
+                setTimeout(() => el.remove(), 300);
+            }, 500);
+        }
+        
+        // Spiel beenden
+        function endGame() {
+            clearInterval(state.gameInterval);
+            showScreen('gameOver');
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Setup-Screen
+        setup.modeWordCloudBtn.addEventListener('click', () => {
+            state.gameMode = 'wordcloud';
+            updateSetupUI();
+        });
+
+        setup.modeReadingBtn.addEventListener('click', () => {
+            state.gameMode = 'reading';
+            updateSetupUI();
+        });
+
+        setup.wordCountGroup.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                state.wordCount = e.target.dataset.value.split('-').map(Number);
+                updateSetupUI();
+            }
+        });
+        
+        setup.visibilityDuration.addEventListener('change', (e) => {
+            state.visibilityDuration = parseInt(e.target.value);
+        });
+
+        setup.animateWordsToggle.addEventListener('change', (e) => {
+            state.animateWords = e.target.checked;
+        });
+
+        setup.speedIncreaseBtn.addEventListener('click', () => {
+            if (state.readingSpeed < 10) {
+                state.readingSpeed++;
+                updateSetupUI();
+            }
+        });
+        
+        setup.speedDecreaseBtn.addEventListener('click', () => {
+            if (state.readingSpeed > 1) {
+                state.readingSpeed--;
+                updateSetupUI();
+            }
+        });
+
+        setup.startGameBtn.addEventListener('click', startGame);
+
+        // Spiel-Screen
+        game.exitBtn.addEventListener('click', () => {
+            clearInterval(state.gameInterval);
+            showScreen('setup');
+        });
+        
+        // Game-Over-Screen
+        gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
+        
+        // Globale Buttons
+        fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
+
+        // Initialisierung
+        updateSetupUI();
+    });
+    </script>
 </body>
 </html>
