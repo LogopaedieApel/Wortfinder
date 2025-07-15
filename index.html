@@ -20,17 +20,13 @@
             --active-text: #000;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
-            overflow: hidden; /* Verhindert Scrollen im Hauptfenster */
+            overflow: hidden;
         }
 
         .screen {
@@ -43,9 +39,7 @@
             padding: 20px;
         }
 
-        .screen.active {
-            display: flex;
-        }
+        .screen.active { display: flex; }
 
         h1 {
             color: var(--primary-color);
@@ -64,17 +58,15 @@
             width: 100%;
         }
         
-        #word-list {
+        #word-list-selector {
             width: 100%;
-            height: 150px;
+            padding: 10px;
+            font-size: 1em;
             background-color: #1e1e1e;
             color: var(--text-color);
             border: 1px solid var(--border-color);
             border-radius: 5px;
-            padding: 10px;
-            font-size: 1em;
             margin-bottom: 20px;
-            resize: vertical;
         }
 
         .settings-box {
@@ -91,17 +83,10 @@
             color: var(--primary-color);
         }
 
-        .settings-group {
-            margin-bottom: 15px;
-        }
+        .settings-group { margin-bottom: 20px; }
+        .settings-group label { display: block; margin-bottom: 10px; font-weight: bold; }
 
-        .settings-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .btn-group button, .btn-group select {
+        .btn-group button {
             padding: 8px 12px;
             border: 1px solid var(--border-color);
             background-color: var(--button-bg);
@@ -122,227 +107,65 @@
 
         #conditional-settings .setting-block { display: none; }
         #conditional-settings .setting-block.active { display: block; }
-
-        select {
-            padding: 8px;
-            background-color: var(--button-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-        }
         
-        /* Toggle Switch für Animation */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        .switch input { display: none; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px; width: 26px;
-            left: 4px; bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--primary-color); }
-        input:checked + .slider:before { transform: translateX(26px); }
+        /* Slider Styling */
+        .slider-container { display: flex; align-items: center; gap: 15px; }
+        input[type="range"] { flex-grow: 1; -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #444; outline: none; border-radius: 5px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--primary-color); cursor: pointer; border-radius: 50%; }
+        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: var(--primary-color); cursor: pointer; border-radius: 50%; }
+        .slider-value { font-weight: bold; min-width: 60px; text-align: right; }
 
         /* Geschwindigkeitsregler */
-        .speed-control {
-            display: flex;
-            align-items: center;
-        }
-        .speed-control button {
-            width: 40px;
-            height: 40px;
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        #speed-value {
-            font-size: 1.5em;
-            margin: 0 15px;
-            min-width: 30px;
-            text-align: center;
-        }
+        .speed-control { display: flex; align-items: center; }
+        .speed-control button { width: 40px; height: 40px; font-size: 1.5em; font-weight: bold; }
+        #speed-value { font-size: 1.5em; margin: 0 15px; min-width: 30px; text-align: center; }
 
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .action-buttons { display: flex; gap: 15px; margin-top: 20px; }
+        .btn { padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: bold; transition: transform 0.2s, box-shadow 0.2s; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-
-        .btn-primary {
-            flex-grow: 1;
-            background-color: var(--primary-color);
-            color: var(--active-text);
-        }
-
-        .btn-secondary {
-            background-color: var(--button-bg);
-            color: var(--text-color);
-        }
-
-        #error-message {
-            color: var(--error-color);
-            margin-top: 15px;
-            font-weight: bold;
-            display: none;
-        }
+        .btn-primary { flex-grow: 1; background-color: var(--primary-color); color: var(--active-text); }
+        .btn-secondary { background-color: var(--button-bg); color: var(--text-color); }
+        #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
 
         /* --- SPIEL-BILDSCHIRM --- */
-        #game-screen {
-            justify-content: flex-start; /* HUD oben */
-        }
-        #game-hud {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(0,0,0,0.7);
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
-
-        #game-stats, #game-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
+        #game-screen { justify-content: flex-start; }
+        #game-hud { position: fixed; top: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; }
         #game-stats span { font-size: 1.2em; }
-        #target-word-display {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-align: center;
-            visibility: hidden; /* Standardmäßig unsichtbar, wird per JS aktiviert */
-        }
-
-        #game-area {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            margin-top: 60px; /* Platz für HUD */
-        }
-
-        .game-word {
-            position: absolute;
-            padding: 8px 15px;
-            background-color: rgba(43, 43, 43, 0.9);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            cursor: pointer;
-            user-select: none;
-            font-size: 1.5em;
-            transition: transform 0.2s, background-color 0.3s;
-        }
-        .game-word:hover {
-            transform: scale(1.1);
-            border-color: var(--primary-color);
-        }
+        #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
+        #game-area { position: relative; width: 100%; height: 100%; overflow: hidden; margin-top: 60px; }
+        .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; /* Emojis sind oft kleiner, daher größerer Font */ transition: transform 0.2s, background-color 0.3s; }
+        .game-word:hover { transform: scale(1.1); border-color: var(--primary-color); }
         
-        /* Modus-spezifisches Wort-Styling (Lesemodus) */
-        .scrolling-word {
-            display: inline-block;
-            margin: 0 50px;
-            white-space: nowrap;
-            padding: 8px 15px;
-            font-size: 2em;
-            cursor: pointer;
-        }
-        .scrolling-word:hover { transform: scale(1.1); }
-        #scrolling-words-container {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            white-space: nowrap;
-            will-change: transform;
-        }
+        .scrolling-word { display: inline-block; margin: 0 50px; white-space: nowrap; font-size: 2.5em; }
+        #scrolling-words-container { position: absolute; top: 50%; transform: translateY(-50%); white-space: nowrap; will-change: transform; }
         
         /* --- ANIMATIONEN & FEEDBACK --- */
         .fade-out { animation: fade-out-anim 0.3s forwards; }
-        @keyframes fade-out-anim {
-            to { opacity: 0; transform: scale(0.5); }
-        }
-
+        @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
         .correct { background-color: var(--success-color) !important; color: white !important; }
         .incorrect { background-color: var(--error-color) !important; color: white !important; }
-        
         .shake { animation: shake-anim 0.5s; }
-        @keyframes shake-anim {
-            10%, 90% { transform: translateX(-3px); }
-            20%, 80% { transform: translateX(3px); }
-            30%, 50%, 70% { transform: translateX(-3px); }
-            40%, 60% { transform: translateX(3px); }
-        }
-
-        /* NEUE Animation für den "Regenschauer"-Effekt */
-        @keyframes fly-across {
-            from {
-                transform: translateX(-100%); /* Startet links außerhalb */
-            }
-            to {
-                transform: translateX(100vw); /* Endet rechts außerhalb */
-            }
-        }
-
-        .word-fly-in {
-            left: 0; /* Startpunkt für transform */
-            animation-name: fly-across;
-            animation-timing-function: linear; /* Konstante Geschwindigkeit */
-            white-space: nowrap; /* Wichtig für lange Wörter */
-        }
-        
-        @keyframes scroll-left {
-            from { transform: translateX(0%); }
-            to { transform: translateX(-50%); }
-        }
-        
-        /* SPIELENDE-BILDSCHIRM */
+        @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
+        @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
+        .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
+        @keyframes scroll-left { from { transform: translateX(0%); } to { transform: translateX(-50%); } }
         #game-over-screen h1 { font-size: 3em; }
-
     </style>
 </head>
 <body>
 
-    <!-- ======================================================= -->
-    <!-- SETUP-BILDSCHIRM                                        -->
-    <!-- ======================================================= -->
     <div id="setup-screen" class="screen active">
         <div class="container">
             <h1>Wortfinderr: Setup</h1>
-            <textarea id="word-list" placeholder="Apfel, Banane, Kirsche, Dattel, Erdbeere, Feige, Grapefruit"></textarea>
-
+            <!-- TEXTAREA ERSETZT DURCH SELECT -->
+            <div class="settings-group">
+                <label for="word-list-selector">Wortliste auswählen</label>
+                <select id="word-list-selector"></select>
+            </div>
+            
             <div class="settings-box">
                 <h2>Einstellungen</h2>
-                
                 <div class="settings-group">
                     <label>Spielmodus</label>
                     <div class="btn-group">
@@ -350,73 +173,49 @@
                         <button id="mode-reading">Lesemodus</button>
                     </div>
                 </div>
-
                 <div id="conditional-settings">
                     <div id="wordcloud-settings" class="setting-block active">
-                         <p style="font-style: italic; color: #aaa;">Die Wörter fliegen im "Regenschauer"-Stil von links nach rechts.</p>
-                         <!-- Alte Einstellungen sind für die neue Animation nicht mehr direkt relevant, bleiben aber im UI -->
+                        <div class="settings-group">
+                            <label for="base-speed-slider">Grundgeschwindigkeit</label>
+                            <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div>
+                        </div>
+                        <div class="settings-group">
+                            <label for="speed-variance-slider">Tempo-Varianz</label>
+                            <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div>
+                        </div>
                     </div>
                     <div id="reading-mode-settings" class="setting-block">
                         <div class="settings-group">
                             <label>Laufgeschwindigkeit</label>
-                            <div class="speed-control">
-                                <button id="speed-decrease" class="btn-secondary">-</button>
-                                <span id="speed-value">5</span>
-                                <button id="speed-increase" class="btn-secondary">+</button>
-                            </div>
+                            <div class="speed-control"><button id="speed-decrease" class="btn-secondary">-</button><span id="speed-value">5</span><button id="speed-increase" class="btn-secondary">+</button></div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="action-buttons">
-                <button id="start-game-btn" class="btn btn-primary">Wortliste verwenden</button>
+                <button id="start-game-btn" class="btn btn-primary">Spiel starten</button>
                 <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button>
             </div>
-            <p id="error-message">Bitte gib mindestens 5 einzigartige Wörter ein.</p>
+            <p id="error-message"></p>
         </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- SPIEL-BILDSCHIRM                                        -->
-    <!-- ======================================================= -->
-    <div id="game-screen" class="screen">
-        <div id="game-hud">
-            <div id="game-stats">
-                <span id="level-display">Level: 1</span>
-                <span id="hits-display">Treffer: 0 / 10</span>
-            </div>
-            <div id="target-word-display"></div>
-            <div id="game-actions">
-                <button id="exit-game-btn" class="btn btn-secondary">Beenden</button>
-                <button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button>
-            </div>
-        </div>
-        <div id="game-area">
-            <!-- Wörter werden hier dynamisch eingefügt -->
-        </div>
-    </div>
-
-    <!-- ======================================================= -->
-    <!-- SPIELENDE-BILDSCHIRM                                    -->
-    <!-- ======================================================= -->
-    <div id="game-over-screen" class="screen">
-        <h1>Spiel vorbei!</h1>
-        <p>Du hast alle Wörter gemeistert.</p>
-        <button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button>
-    </div>
+    <div id="game-screen" class="screen"><div id="game-hud"><div id="game-stats"><span id="level-display">Level: 1</span><span id="hits-display">Treffer: 0 / 10</span></div><div id="target-word-display"></div><div id="game-actions"><button id="exit-game-btn" class="btn btn-secondary">Beenden</button><button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button></div></div><div id="game-area"></div></div>
+    <div id="game-over-screen" class="screen"><h1>Spiel vorbei!</h1><p>Du hast alle Wörter gemeistert.</p><button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- DOM ELEMENTE ---
-        const screens = {
-            setup: document.getElementById('setup-screen'),
-            game: document.getElementById('game-screen'),
-            gameOver: document.getElementById('game-over-screen'),
+        // --- VORDEFINIERTE WORTLISTEN (JSON-FORMAT) ---
+        const PREDEFINED_WORD_LISTS = {
+            "SCH initial (Emoji)": ["👡", "🍝", "🐑", "🐢", "🏫", "🚢", "🍫", "✂️", "✍️", "🎀", "🦋", "🐷", "⬛️"],
+            "Tiere (einfach)": ["Hund", "Katze", "Maus", "Elefant", "Tiger", "Löwe", "Bär", "Fisch", "Vogel", "Pferd", "Affe", "Zebra"],
+            "Obst & Gemüse": ["Apfel", "Banane", "Kirsche", "Dattel", "Erdbeere", "Feige", "Grapefruit", "Honigmelone", "Ingwer", "Zitrone", "Karotte", "Lauch"]
         };
 
+        // --- DOM ELEMENTE ---
+        const screens = { setup: document.getElementById('setup-screen'), game: document.getElementById('game-screen'), gameOver: document.getElementById('game-over-screen') };
         const setup = {
-            wordListInput: document.getElementById('word-list'),
+            wordListSelector: document.getElementById('word-list-selector'),
             modeWordCloudBtn: document.getElementById('mode-wordcloud'),
             modeReadingBtn: document.getElementById('mode-reading'),
             wordCloudSettings: document.getElementById('wordcloud-settings'),
@@ -426,60 +225,50 @@
             speedValue: document.getElementById('speed-value'),
             startGameBtn: document.getElementById('start-game-btn'),
             errorMessage: document.getElementById('error-message'),
+            baseSpeedSlider: document.getElementById('base-speed-slider'),
+            baseSpeedValue: document.getElementById('base-speed-value'),
+            speedVarianceSlider: document.getElementById('speed-variance-slider'),
+            speedVarianceValue: document.getElementById('speed-variance-value'),
         };
-
         const game = {
-            hud: document.getElementById('game-hud'),
             levelDisplay: document.getElementById('level-display'),
             hitsDisplay: document.getElementById('hits-display'),
             targetWordDisplay: document.getElementById('target-word-display'),
             area: document.getElementById('game-area'),
             exitBtn: document.getElementById('exit-game-btn'),
         };
-        
-        const gameOver = {
-            restartBtn: document.getElementById('restart-btn'),
-        };
-
+        const gameOver = { restartBtn: document.getElementById('restart-btn') };
         const fullscreenBtns = [document.getElementById('fullscreen-btn'), document.getElementById('fullscreen-btn-game')];
 
-        // --- SPIELSTATUS & EINSTELLUNGEN ---
+        // --- SPIELSTATUS ---
         let state = {
             gameMode: 'wordcloud',
             readingSpeed: 5,
-            
-            // NEUE Zustände für den "Regenschauer"-Modus
             numLanes: 7,
             laneStates: [],
-            animationSpeed: 10000, // 10s um den Bildschirm zu queren
-
+            baseAnimationSpeed: 10000,
+            speedVariance: 20,
             wordList: [],
             usedTargetWords: [],
             targetWord: null,
             level: 1,
             hits: 0,
             hitsNeeded: 10,
-            
             gameInterval: null,
         };
 
         // --- FUNKTIONEN ---
-        function showScreen(screenName) {
-            Object.values(screens).forEach(s => s.classList.remove('active'));
-            screens[screenName].classList.add('active');
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert(`Fehler beim Aktivieren des Vollbildmodus: ${err.message} (${err.name})`);
-                });
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
+        function populateWordListSelector() {
+            for (const listName in PREDEFINED_WORD_LISTS) {
+                const option = document.createElement('option');
+                option.value = listName;
+                option.textContent = listName;
+                setup.wordListSelector.appendChild(option);
             }
         }
+
+        function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
+        function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => alert(`Fehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
 
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
@@ -487,79 +276,65 @@
             setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud');
             setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading');
             setup.speedValue.textContent = state.readingSpeed;
+            setup.baseSpeedSlider.value = state.baseAnimationSpeed;
+            setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's';
+            setup.speedVarianceSlider.value = state.speedVariance;
+            setup.speedVarianceValue.textContent = `±${state.speedVariance}%`;
         }
 
         function startGame() {
-            const rawWords = setup.wordListInput.value.split(/[\n,]/);
-            const uniqueWords = [...new Set(rawWords.map(w => w.trim()).filter(w => w.length > 0))];
+            const selectedListName = setup.wordListSelector.value;
+            const selectedList = PREDEFINED_WORD_LISTS[selectedListName];
 
-            if (uniqueWords.length < 5) {
+            if (!selectedList || selectedList.length < 5) {
+                setup.errorMessage.textContent = "Die ausgewählte Liste enthält nicht genügend Elemente (mindestens 5 benötigt).";
                 setup.errorMessage.style.display = 'block';
                 return;
             }
-
             setup.errorMessage.style.display = 'none';
-            state.wordList = uniqueWords;
+            state.wordList = selectedList;
             state.level = 1;
             state.hits = 0;
             state.usedTargetWords = [];
-
             showScreen('game');
             startLevel();
         }
         
         function startLevel() {
-            if(state.usedTargetWords.length >= state.wordList.length) {
-                endGame();
-                return;
-            }
-
+            if (state.usedTargetWords.length >= state.wordList.length) { endGame(); return; }
             let availableWords = state.wordList.filter(w => !state.usedTargetWords.includes(w));
             state.targetWord = availableWords[Math.floor(Math.random() * availableWords.length)];
             state.usedTargetWords.push(state.targetWord);
-            
             state.hits = 0;
             updateHUD();
-            
             game.area.innerHTML = '';
             clearInterval(state.gameInterval);
-
-            if (state.gameMode === 'wordcloud') {
-                startWordCloudMode();
-            } else {
-                startReadingMode();
-            }
+            if (state.gameMode === 'wordcloud') startWordCloudMode();
+            else startReadingMode();
         }
 
         function updateHUD() {
             game.levelDisplay.textContent = `Level: ${state.level}`;
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
             game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`;
-            game.targetWordDisplay.style.visibility = 'visible'; // Immer sichtbar machen
+            game.targetWordDisplay.style.visibility = 'visible';
         }
         
-        // --- WORTWOLKEN-MODUS LOGIK ("Regenschauer") ---
         function startWordCloudMode() {
             state.laneStates = Array(state.numLanes).fill(0);
-            const spawnRate = 400; // Versuche alle 400ms ein Wort zu spawnen
+            const spawnRate = 350;
             state.gameInterval = setInterval(spawnWordRain, spawnRate);
         }
         
         function spawnWordRain() {
             if (document.hidden) return;
-
             const now = Date.now();
             const freeLanes = [];
-            for (let i = 0; i < state.numLanes; i++) {
-                if (state.laneStates[i] < now) {
-                    freeLanes.push(i);
-                }
-            }
+            for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); }
             if (freeLanes.length === 0) return;
 
             const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)];
             const word = state.wordList[Math.floor(Math.random() * state.wordList.length)];
-
             const el = document.createElement('div');
             el.textContent = word;
             el.classList.add('game-word');
@@ -568,87 +343,62 @@
             const laneHeight = areaRect.height / state.numLanes;
             el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`;
 
+            const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100);
+            const randomDeviation = (Math.random() * 2 - 1) * varianceAmount;
+            const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation);
+
             game.area.appendChild(el);
             const wordWidth = el.offsetWidth;
-
-            const pixelsPerSecond = areaRect.width / (state.animationSpeed / 1000);
-            const clearanceTime = (wordWidth + 100) / pixelsPerSecond; // +100px Sicherheitsabstand
+            const pixelsPerSecond = areaRect.width / (finalAnimationDuration / 1000);
+            const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
             state.laneStates[laneIndex] = now + clearanceTime * 1000;
 
             el.classList.add('word-fly-in');
-            el.style.animationDuration = `${state.animationSpeed}ms`;
+            el.style.animationDuration = `${finalAnimationDuration}ms`;
             el.addEventListener('click', handleWordClick);
 
-            setTimeout(() => { el.remove(); }, state.animationSpeed);
+            setTimeout(() => el.remove(), finalAnimationDuration);
         }
-
-        // --- LESEMODUS LOGIK ---
+        
         function startReadingMode() {
-            const container = document.createElement('div');
-            container.id = 'scrolling-words-container';
-            
+            const container = document.createElement('div'); container.id = 'scrolling-words-container';
             let wordsToScroll = [];
-            for(let i = 0; i < 5; i++) {
-                wordsToScroll.push(...[...state.wordList].sort(() => Math.random() - 0.5));
-            }
+            for(let i=0; i<5; i++) wordsToScroll.push(...[...state.wordList].sort(() => Math.random() - 0.5));
             wordsToScroll.push(...wordsToScroll);
-
             wordsToScroll.forEach(word => {
-                const el = document.createElement('span');
-                el.textContent = word;
-                el.classList.add('game-word', 'scrolling-word');
-                el.addEventListener('click', handleWordClick);
-                container.appendChild(el);
+                const el = document.createElement('span'); el.textContent = word; el.classList.add('game-word', 'scrolling-word');
+                el.addEventListener('click', handleWordClick); container.appendChild(el);
             });
-            
             game.area.appendChild(container);
-            
-            const containerWidth = container.offsetWidth;
-            const duration = containerWidth / (state.readingSpeed * 10);
+            const duration = container.offsetWidth / (state.readingSpeed * 10);
             container.style.animation = `scroll-left ${duration}s linear infinite`;
         }
         
-        // --- ALLGEMEINE SPIELINTERAKTION ---
         function handleWordClick(e) {
-            const clickedWord = e.target.textContent;
-            const el = e.target;
-            
-            el.style.pointerEvents = 'none';
-
-            if (clickedWord === state.targetWord) {
-                state.hits++;
-                el.classList.add('correct');
-                updateHUD();
-                
-                if (state.hits >= state.hitsNeeded) {
-                    state.level++;
-                    setTimeout(startLevel, 1000);
-                }
-            } else {
-                el.classList.add('incorrect', 'shake');
-            }
-            
-            setTimeout(() => {
-                el.classList.add('fade-out');
-                setTimeout(() => el.remove(), 300);
-            }, 500);
+            const el = e.target; el.style.pointerEvents = 'none';
+            if (el.textContent === state.targetWord) {
+                state.hits++; el.classList.add('correct'); updateHUD();
+                if (state.hits >= state.hitsNeeded) setTimeout(startLevel, 1000);
+            } else { el.classList.add('incorrect', 'shake'); }
+            setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
         }
         
-        function endGame() {
-            clearInterval(state.gameInterval);
-            showScreen('gameOver');
-        }
+        function endGame() { clearInterval(state.gameInterval); showScreen('gameOver'); }
 
         // --- EVENT LISTENERS ---
         setup.modeWordCloudBtn.addEventListener('click', () => { state.gameMode = 'wordcloud'; updateSetupUI(); });
         setup.modeReadingBtn.addEventListener('click', () => { state.gameMode = 'reading'; updateSetupUI(); });
         setup.speedIncreaseBtn.addEventListener('click', () => { if (state.readingSpeed < 10) state.readingSpeed++; updateSetupUI(); });
         setup.speedDecreaseBtn.addEventListener('click', () => { if (state.readingSpeed > 1) state.readingSpeed--; updateSetupUI(); });
+        setup.baseSpeedSlider.addEventListener('input', (e) => { state.baseAnimationSpeed = parseInt(e.target.value); updateSetupUI(); });
+        setup.speedVarianceSlider.addEventListener('input', (e) => { state.speedVariance = parseInt(e.target.value); updateSetupUI(); });
         setup.startGameBtn.addEventListener('click', startGame);
         game.exitBtn.addEventListener('click', () => { clearInterval(state.gameInterval); showScreen('setup'); });
         gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
         fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
 
+        // --- INITIALISIERUNG ---
+        populateWordListSelector();
         updateSetupUI();
     });
     </script>
