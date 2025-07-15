@@ -43,10 +43,35 @@
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
         /* Game-Screen */
-        #game-screen { justify-content: flex-start; } #game-hud { position: fixed; top: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; } #game-stats span { font-size: 1.2em; }
+        /* --- GEÄNDERT: #game-screen wird zum Haupt-Flex-Container für das Layout --- */
+        #game-screen {
+            justify-content: flex-start;
+            padding: 0; /* Kein Padding mehr am Haupt-Screen, damit die Elemente die volle Breite nutzen können */
+        }
+        
+        /* --- GEÄNDERT: #game-hud ist jetzt ein normales Flex-Item, nicht mehr 'fixed' --- */
+        #game-hud {
+            width: 100%;
+            background-color: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            flex-shrink: 0; /* Verhindert, dass die Leiste schrumpft */
+        }
+
+        #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; }
+        #game-stats span { font-size: 1.2em; }
         #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
-        #game-area { position: relative; width: 100%; height: 100%; overflow: hidden; margin-top: 60px; }
+        
+        /* --- GEÄNDERT: #game-area füllt den RESTLICHEN Platz und ist NICHT scrollbar --- */
+        #game-area {
+            position: relative;
+            width: 100%;
+            flex: 1; /* WICHTIG: Nimmt den gesamten verbleibenden Platz ein */
+            overflow: hidden; /* WICHTIG: Verhindert jegliches Scrollen des Bereichs selbst */
+        }
         
         /* Wortwolke-Modus Stile */
         .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; transition: transform 0.2s, background-color 0.3s; }
@@ -54,24 +79,29 @@
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 
-        /* NEU: Lesemodus Stile */
+        /* Lesemodus Stile */
+        /* --- GEÄNDERT: overflow-y: auto entfernt, da #game-area jetzt overflow: hidden hat --- */
         #game-area.reading-mode-active {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            overflow-y: auto;
+            padding: 20px; /* Padding, damit der innere Container nicht am Rand klebt */
         }
+        
+        /* --- GEÄNDERT: Scrollen wird jetzt hier gekapselt, falls nötig --- */
         #reading-page-container {
             background-color: var(--container-bg-color);
             padding: 30px;
             border-radius: 10px;
             max-width: 900px;
             width: 100%;
+            max-height: 100%; /* NEU: Der Container wird nie größer als der verfügbare Platz */
+            overflow-y: auto;  /* NEU: FALLS der Inhalt doch zu hoch ist, wird nur DIESER Container scrollbar */
             line-height: 2.5;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: justify;
         }
+
         .reading-word {
             display: inline-block; /* Damit Margin/Padding korrekt angewendet wird */
             font-size: 1.5em;
