@@ -12,7 +12,7 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; padding: 20px; }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; /* GEÄNDERT: dvh statt vh für mobile Browser */ width: 100vw; padding: 20px; }
         .screen.active { display: flex; }
         h1 { color: var(--primary-color); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; font-size: 2.5em; }
         
@@ -43,11 +43,11 @@
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
         /* Game-Screen */
-        #game-screen { justify-content: flex-start; padding: 0; /* Kein Padding für den Screen selbst */ } 
-        #game-hud { /* position: fixed; <-- ENTFERNT */ width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; /* flex-shrink: 0; <-- sorgt dafür, dass der HUD nicht schrumpft */ }
+        #game-screen { justify-content: flex-start; padding: 0; } 
+        #game-hud { width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; flex-shrink: 0; }
         #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; } #game-stats span { font-size: 1.2em; }
         #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
-        #game-area { position: relative; width: 100%; flex: 1; /* <-- GEÄNDERT: Füllt den restlichen Platz aus */ overflow: hidden; /* margin-top: 60px; <-- ENTFERNT */ }
+        #game-area { position: relative; width: 100%; flex: 1; overflow: hidden; }
         
         /* Wortwolke-Modus Stile */
         .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; transition: transform 0.2s, background-color 0.3s; }
@@ -61,25 +61,26 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow: hidden; /* <-- GEÄNDERT: Kein Scrollen mehr erlaubt */
+            overflow: hidden; 
         }
         #reading-page-container {
             background-color: var(--container-bg-color);
-            padding: 30px;
+            padding: 20px; /* Padding leicht reduziert */
             border-radius: 10px;
-            max-width: 900px;
+            max-width: 950px; /* Etwas breiter erlaubt */
             width: 100%;
-            line-height: 2; /* <-- GEÄNDERT: Etwas kompakter */
+            line-height: 2.2; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: justify;
-            max-height: 100%; /* <-- NEU: Stellt sicher, dass der Container nicht aus dem Spielbereich ragt */
-            overflow: hidden; /* <-- NEU: Verhindert internes Scrollen, falls Inhalt doch überläuft */
+            max-height: 100%; 
+            overflow: hidden; 
         }
         .reading-word {
             display: inline-block;
-            font-size: 2.2vmin; /* <-- GEÄNDERT: Responsive Schriftgröße, passt sich an die Bildschirmgröße an */
+            /* GEÄNDERT: clamp() sorgt für eine responsive Schriftgröße mit Min/Max-Werten */
+            font-size: clamp(16px, 2.5vmin, 26px);
             padding: 2px 6px;
-            margin: 0 5px;
+            margin: 0 4px;
             cursor: pointer;
             border-radius: 4px;
             transition: background-color 0.2s, color 0.2s;
@@ -224,12 +225,11 @@
             game.area.innerHTML = '';
             clearInterval(state.gameInterval);
 
-            // Setzen der Klassen für den Spielbereich je nach Modus
-            game.area.classList.remove('reading-mode-active'); // Zuerst immer entfernen
+            game.area.classList.remove('reading-mode-active');
             if (state.gameMode === 'reading') {
                 game.area.classList.add('reading-mode-active');
                 startReadingMode();
-            } else { // gameMode === 'wordcloud'
+            } else {
                 startWordCloudMode();
             }
         }
@@ -300,7 +300,7 @@
                 el.classList.add('correct');
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
-                    clearInterval(state.gameInterval); // Stoppe das Spawnen neuer Wörter
+                    clearInterval(state.gameInterval);
                     setTimeout(() => {
                         state.level++;
                         startLevel();
@@ -315,8 +315,9 @@
         // --- Lesemodus ---
 
         function startReadingMode() {
-            const TOTAL_WORDS = 120;
-            const TARGET_COUNT = 10;
+            // GEÄNDERT: Wortanzahl reduziert für bessere Passform auf Tablets
+            const TOTAL_WORDS = 80; 
+            const TARGET_COUNT = 12; // Angepasst an die neue Gesamtzahl
             state.hitsNeeded = TARGET_COUNT;
 
             const distractors = state.wordList.filter(w => w !== state.targetWord);
