@@ -5,38 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
     <style>
+        /* CSS-Variablen und grundlegende Stile */
         :root {
             --primary-color: #FF8C00; --background-color: #1a1a1a; --container-bg-color: #2b2b2b; --text-color: #f0f0f0; --success-color: #4CAF50; --error-color: #f44336;
             --border-color: #444; --button-bg: #333; --button-hover-bg: #555; --active-bg: var(--primary-color); --active-text: #000;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; 
-               /* NEU: Stellt sicher, dass der verkleinerte .screen zentriert wird */
-               display: flex; align-items: center; justify-content: center; min-height: 100vh;
-        }
-        .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            background-color: var(--background-color); /* Hintergrund für den Container */
-
-            /* --- HIER IST DIE ANPASSUNG FÜR DIE SKALIERUNG --- */
-            /* Manuell anpassbar: z.B. 95vh/95vw oder 90vh/90vw */
-            height: 95vh;
-            width: 95vw;
-            
-            /* Optional: Schöne abgerundete Ecken und ein Schatten für mehr Tiefe */
-            border-radius: 15px; 
-            box-shadow: 0 0 25px rgba(0,0,0,0.6); 
-            
-            padding: 20px;
-            position: relative; /* Wichtig für die Positionierung von Inhalten darin */
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; padding: 20px; }
         .screen.active { display: flex; }
         h1 { color: var(--primary-color); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; font-size: 2.5em; }
         
+        /* Setup-Screen */
         #setup-screen .container { background-color: var(--container-bg-color); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); max-width: 600px; width: 100%; }
-        /* Der Rest des CSS bleibt größtenteils gleich... */
         .selector-group { display: flex; gap: 15px; margin-bottom: 20px; }
         .selector-group > div { flex: 1; }
         select { width: 100%; padding: 10px; font-size: 1em; background-color: #1e1e1e; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; }
@@ -61,68 +42,67 @@
         .btn-secondary { background-color: var(--button-bg); color: var(--text-color); }
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
-        #game-screen {
-            justify-content: flex-start;
-            padding: 0;
-            overflow: hidden;
-        }
-        #game-hud {
-            width: 100%;
-            flex-shrink: 0;
-            padding: 10px 20px;
-            background-color: rgba(0,0,0,0.3);
-            border-radius: 15px 15px 0 0;
-        }
+        /* Game-Screen */
+        #game-screen { justify-content: flex-start; } #game-hud { position: fixed; top: 0; left: 0; width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; } #game-stats span { font-size: 1.2em; }
         #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
+        #game-area { position: relative; width: 100%; height: 100%; overflow: hidden; margin-top: 60px; }
         
-        #game-area {
-            position: relative;
-            width: 100%;
-            flex-grow: 1; 
-            overflow: hidden;
-        }
-        
-        .game-word { position: absolute; padding: 5px 10px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 4vmin; transition: transform 0.2s, background-color 0.3s; }
+        /* Wortwolke-Modus Stile */
+        .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; transition: transform 0.2s, background-color 0.3s; }
         .game-word:hover { transform: scale(1.1); border-color: var(--primary-color); }
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 
-        #game-area.reading-mode-active { display: flex; justify-content: center; align-items: center; padding: 2vw; }
-        #reading-page-container { background-color: var(--container-bg-color); padding: 2vmin 3vmin; border-radius: 10px; width: 100%; height: 100%; line-height: 2.2; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: justify; overflow: hidden; }
-        .reading-word { display: inline-block; font-size: 2.5vmin; padding: 0 0.5vmin; margin: 0 0.5vmin; cursor: pointer; border-radius: 4px; transition: background-color 0.2s, color 0.2s; user-select: none; }
-        .reading-word:hover { background-color: var(--button-hover-bg); }
-        .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
+        /* NEU: Lesemodus Stile */
+        #game-area.reading-mode-active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        #reading-page-container {
+            background-color: var(--container-bg-color);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 2.5;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: justify;
+        }
+        .reading-word {
+            display: inline-block; /* Damit Margin/Padding korrekt angewendet wird */
+            font-size: 1.5em;
+            padding: 2px 6px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s, color 0.2s;
+            user-select: none;
+        }
+        .reading-word:hover {
+            background-color: var(--button-hover-bg);
+        }
+        .reading-word.correct { /* Passt auf die existierende .correct-Klasse auf, aber spezifischer */
+            background-color: var(--success-color) !important;
+            color: white !important;
+            cursor: default;
+        }
         
+        /* Allgemeine Effekte & Animationen */
         .fade-out { animation: fade-out-anim 0.3s forwards; } @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
         .correct { background-color: var(--success-color) !important; color: white !important; } 
         .incorrect { background-color: var(--error-color) !important; color: white !important; }
         .shake { animation: shake-anim 0.5s; } @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
         
-        #game-over-screen {
-            justify-content: center;
-        }
+        /* Game-Over Screen */
         #game-over-screen h1 { font-size: 3em; }
     </style>
 </head>
 <body>
 
-    <!-- HTML bleibt unverändert -->
-    <div id="setup-screen" class="screen active">
-        <!-- ... -->
-    </div>
-    
-    <div id="game-screen" class="screen">
-        <!-- ... -->
-    </div>
-    <div id="game-over-screen" class="screen">
-        <!-- ... -->
-    </div>
-
-    <!-- Dein komplettes JavaScript bleibt hier unverändert -->
-    <script>
-        // ... (Der gesamte JavaScript-Code von der vorherigen Version)
-    </script>
     <div id="setup-screen" class="screen active">
         <div class="container">
             <h1 id="main-title">Wortfinder: Setup</h1>
@@ -176,16 +156,6 @@
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
 
-        function startWordCloudMode() {
-            const laneHeight = 60; 
-            state.numLanes = Math.max(3, Math.floor(game.area.offsetHeight / laneHeight));
-
-            state.laneStates = Array(state.numLanes).fill(0);
-            state.hitsNeeded = 10;
-            updateHUD();
-            state.gameInterval = setInterval(spawnWordRain, 350);
-        }
-
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
             setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
@@ -214,13 +184,12 @@
 
             setup.startGameBtn.addEventListener('click', startGame);
             game.exitBtn.addEventListener('click', () => { clearInterval(state.gameInterval); showScreen('setup'); });
-            gameOver.restartBtn.addEventListener('click', () => {
-                // Beim Neustart auch den setup-Screen wieder aktivieren
-                showScreen('setup');
-            });
+            gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
         }
         
+        // --- Game Logic ---
+
         function startGame() {
             const selectedTopic = setup.topicSelector.value;
             const selectedList = setup.listSelector.value;
@@ -253,10 +222,10 @@
             clearInterval(state.gameInterval);
 
             if (state.gameMode === 'wordcloud') {
-                game.area.className = '';
+                game.area.className = ''; // Alte Klassen für den Lesemodus entfernen
                 startWordCloudMode();
-            } else {
-                game.area.className = 'reading-mode-active';
+            } else { // gameMode === 'reading'
+                game.area.className = 'reading-mode-active'; // Styling für den Lesemodus aktivieren
                 startReadingMode();
             }
         }
@@ -266,6 +235,15 @@
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
             game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`;
             game.targetWordDisplay.style.visibility = 'visible';
+        }
+
+        // --- Wortwolke Modus ---
+
+        function startWordCloudMode() {
+            state.laneStates = Array(state.numLanes).fill(0);
+            state.hitsNeeded = 10;
+            updateHUD();
+            state.gameInterval = setInterval(spawnWordRain, 350);
         }
 
         function spawnWordRain() {
@@ -291,7 +269,7 @@
             
             const areaRect = game.area.getBoundingClientRect();
             const laneHeight = areaRect.height / state.numLanes;
-            el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - el.offsetHeight)}px`;
+            el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`;
             
             const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100);
             const randomDeviation = (Math.random() * 2 - 1) * varianceAmount;
@@ -318,7 +296,7 @@
                 el.classList.add('correct');
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
-                    clearInterval(state.gameInterval);
+                    clearInterval(state.gameInterval); // Stoppe das Spawnen neuer Wörter
                     setTimeout(() => {
                         state.level++;
                         startLevel();
@@ -330,35 +308,38 @@
             setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
         }
         
+        // --- Lesemodus ---
+
         function startReadingMode() {
+            const TOTAL_WORDS = 120;
+            const TARGET_COUNT = 10;
+            state.hitsNeeded = TARGET_COUNT;
+
+            const distractors = state.wordList.filter(w => w !== state.targetWord);
+            let wordsForPage = [];
+
+            for (let i = 0; i < TARGET_COUNT; i++) wordsForPage.push(state.targetWord);
+            for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
+                if(distractors.length > 0) {
+                   wordsForPage.push(distractors[Math.floor(Math.random() * distractors.length)]);
+                }
+            }
+
+            shuffleArray(wordsForPage);
+
             const pageContainer = document.createElement('div');
             pageContainer.id = 'reading-page-container';
-            game.area.appendChild(pageContainer);
 
-            requestAnimationFrame(() => {
-                const TOTAL_WORDS = 150;
-                const TARGET_COUNT = 15;
-                state.hitsNeeded = TARGET_COUNT;
-
-                const distractors = state.wordList.filter(w => w !== state.targetWord);
-                let wordsForPage = [];
-                for (let i = 0; i < TARGET_COUNT; i++) wordsForPage.push(state.targetWord);
-                for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
-                    if (distractors.length > 0) wordsForPage.push(distractors[Math.floor(Math.random() * distractors.length)]);
-                }
-                shuffleArray(wordsForPage);
-
-                wordsForPage.forEach(word => {
-                    if (pageContainer.scrollHeight > pageContainer.clientHeight) return;
-                    
-                    const wordSpan = document.createElement('span');
-                    wordSpan.textContent = word;
-                    wordSpan.classList.add('reading-word');
-                    wordSpan.addEventListener('click', handleReadingWordClick);
-                    pageContainer.appendChild(wordSpan);
-                });
-                updateHUD();
+            wordsForPage.forEach(word => {
+                const wordSpan = document.createElement('span');
+                wordSpan.textContent = word;
+                wordSpan.classList.add('reading-word');
+                wordSpan.addEventListener('click', handleReadingWordClick);
+                pageContainer.appendChild(wordSpan);
             });
+
+            game.area.appendChild(pageContainer);
+            updateHUD();
         }
 
         function handleReadingWordClick(e) {
@@ -382,18 +363,20 @@
                 setTimeout(() => el.classList.remove('incorrect', 'shake'), 500);
             }
         }
+
+        // --- Hilfsfunktionen & Rest ---
         
-        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
         async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
         function populateTopicSelector() { Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
-        function showScreen(screenName) {
-            Object.values(screens).forEach(s => s.classList.remove('active'));
-            const screenToShow = screens[screenName];
-            if (screenToShow) {
-                screenToShow.classList.add('active');
-            }
-        }
+        function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
         function endGame() { clearInterval(state.gameInterval); showScreen('gameOver'); }
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
 
