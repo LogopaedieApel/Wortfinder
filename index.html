@@ -59,6 +59,7 @@
     </style>
 </head>
 <body>
+
     <div id="setup-screen" class="screen active">
         <div class="container">
             <h1 id="main-title">Wortfinderr: Setup</h1>
@@ -66,119 +67,165 @@
                 <div> <label for="topic-selector">Thema</label> <select id="topic-selector"></select> </div>
                 <div> <label for="list-selector">Liste</label> <select id="list-selector"></select> </div>
             </div>
-            <div class="settings-box"> <h2>Einstellungen</h2> <div class="settings-group"> <label>Spielmodus</label> <div class="btn-group"> <button id="mode-wordcloud" class="active">Wortwolke</button> <button id="mode-reading">Lesemodus</button> </div> </div> <div id="conditional-settings"> <div id="wordcloud-settings" class="setting-block active"> <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div> <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div> </div> <div id="reading-mode-settings" class="setting-block"> <div class="settings-group"> <label>Laufgeschwindigkeit</label> <div class="speed-control"><button id="speed-decrease" class="btn-secondary">-</button><span id="speed-value">5</span><button id="speed-increase" class="btn-secondary">+</button></div> </div> </div> </div> </div>
+            <div class="settings-box"> <h2>Einstellungen</h2> <div class="settings-group"> <label>Spielmodus</label> <div class="btn-group"> <button id="mode-wordcloud" class="active">Wortwolke</button> <button id="mode-reading">Lesemodus</button> </div> </div> <div id="conditional-settings"> <div id="wordcloud-settings" class="setting-block active">
+                <!-- NEUE EINSTELLUNG FÜR ZIELWORT-HÄUFIGKEIT -->
+                <div class="settings-group">
+                    <label for="target-frequency-slider">Zielwort-Häufigkeit</label>
+                    <div class="slider-container">
+                        <input type="range" id="target-frequency-slider" min="10" max="50" value="30" step="5">
+                        <span id="target-frequency-value" class="slider-value">30%</span>
+                    </div>
+                </div>
+                <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div>
+                <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div>
+            </div> <div id="reading-mode-settings" class="setting-block"> <div class="settings-group"> <label>Laufgeschwindigkeit</label> <div class="speed-control"><button id="speed-decrease" class="btn-secondary">-</button><span id="speed-value">5</span><button id="speed-increase" class="btn-secondary">+</button></div> </div> </div> </div> </div>
             <div class="action-buttons"> <button id="start-game-btn" class="btn btn-primary">Spiel starten</button> <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button> </div>
             <p id="error-message"></p>
         </div>
     </div>
+    <!-- Rest des HTMLs unverändert -->
     <div id="game-screen" class="screen"><div id="game-hud"><div id="game-stats"><span id="level-display">Level: 1</span><span id="hits-display">Treffer: 0 / 10</span></div><div id="target-word-display"></div><div id="game-actions"><button id="exit-game-btn" class="btn btn-secondary">Beenden</button><button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button></div></div><div id="game-area"></div></div>
     <div id="game-over-screen" class="screen"><h1>Spiel vorbei!</h1><p>Du hast alle Wörter gemeistert.</p><button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- DATENBANK-KONFIGURATION ---
-        // Das Haupt-Objekt, das nach dem Laden befüllt wird.
         let WORD_DATA = {};
-        
-        // Definiert, welche Themen (und damit welche Dateien) geladen werden sollen.
-        // Der Schlüssel ist der Anzeigename, der Wert der Dateiname.
-        const TOPICS_TO_LOAD = {
-            "Artikulation": "artikulation.json",
-            "Wortschatz": "wortschatz.json",
-            "Lesen": "lesen.json"
-        };
-        // Für GitHub: Ändere die URLs hier, z.B.:
-        // const GITHUB_BASE_URL = 'https://DEIN_USERNAME.github.io/DEIN_REPO/';
-        // const TOPICS_TO_LOAD = { ... "Artikulation": GITHUB_BASE_URL + "artikulation.json", ... };
-
-        // --- DOM ELEMENTE --- (unverändert)
+        const TOPICS_TO_LOAD = { "Artikulation": "artikulation.json", "Wortschatz": "wortschatz.json", "Lesen": "lesen.json" };
         const screens = { setup: document.getElementById('setup-screen'), game: document.getElementById('game-screen'), gameOver: document.getElementById('game-over-screen') };
-        const setup = { topicSelector: document.getElementById('topic-selector'), listSelector: document.getElementById('list-selector'), modeWordCloudBtn: document.getElementById('mode-wordcloud'), modeReadingBtn: document.getElementById('mode-reading'), wordCloudSettings: document.getElementById('wordcloud-settings'), readingModeSettings: document.getElementById('reading-mode-settings'), speedDecreaseBtn: document.getElementById('speed-decrease'), speedIncreaseBtn: document.getElementById('speed-increase'), speedValue: document.getElementById('speed-value'), startGameBtn: document.getElementById('start-game-btn'), errorMessage: document.getElementById('error-message'), baseSpeedSlider: document.getElementById('base-speed-slider'), baseSpeedValue: document.getElementById('base-speed-value'), speedVarianceSlider: document.getElementById('speed-variance-slider'), speedVarianceValue: document.getElementById('speed-variance-value') };
+        const setup = {
+            topicSelector: document.getElementById('topic-selector'), listSelector: document.getElementById('list-selector'),
+            modeWordCloudBtn: document.getElementById('mode-wordcloud'), modeReadingBtn: document.getElementById('mode-reading'),
+            wordCloudSettings: document.getElementById('wordcloud-settings'), readingModeSettings: document.getElementById('reading-mode-settings'),
+            speedDecreaseBtn: document.getElementById('speed-decrease'), speedIncreaseBtn: document.getElementById('speed-increase'),
+            speedValue: document.getElementById('speed-value'), startGameBtn: document.getElementById('start-game-btn'),
+            errorMessage: document.getElementById('error-message'), baseSpeedSlider: document.getElementById('base-speed-slider'),
+            baseSpeedValue: document.getElementById('base-speed-value'), speedVarianceSlider: document.getElementById('speed-variance-slider'),
+            speedVarianceValue: document.getElementById('speed-variance-value'),
+            // NEUES UI-ELEMENT
+            targetFrequencySlider: document.getElementById('target-frequency-slider'),
+            targetFrequencyValue: document.getElementById('target-frequency-value'),
+        };
         const game = { levelDisplay: document.getElementById('level-display'), hitsDisplay: document.getElementById('hits-display'), targetWordDisplay: document.getElementById('target-word-display'), area: document.getElementById('game-area'), exitBtn: document.getElementById('exit-game-btn') };
         const gameOver = { restartBtn: document.getElementById('restart-btn') };
         const fullscreenBtns = [document.getElementById('fullscreen-btn'), document.getElementById('fullscreen-btn-game')];
-        let state = { gameMode: 'wordcloud', readingSpeed: 5, numLanes: 7, laneStates: [], baseAnimationSpeed: 10000, speedVariance: 20, wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null };
+        let state = {
+            gameMode: 'wordcloud', readingSpeed: 5, numLanes: 7, laneStates: [], baseAnimationSpeed: 10000,
+            speedVariance: 20,
+            // NEUER STATE-WERT
+            targetWordFrequency: 30, // Standardwert 30%
+            wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
+        };
 
-        // --- NEUE LADEFUNKTION ---
-        async function loadWordData() {
-            try {
-                const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => {
-                    const response = await fetch(fileName);
-                    if (!response.ok) {
-                        throw new Error(`Konnte Datei nicht laden: ${fileName} (Status: ${response.status})`);
-                    }
-                    const data = await response.json();
-                    WORD_DATA[topicName] = data;
-                });
-                await Promise.all(fetchPromises);
-                console.log("Alle Wortlisten erfolgreich geladen:", WORD_DATA);
-            } catch (error) {
-                console.error("Schwerwiegender Fehler beim Laden der Wortlisten:", error);
-                // Zeige dem Benutzer einen Fehler an
-                document.getElementById('main-title').textContent = "Fehler!";
-                setup.errorMessage.textContent = `Die Wortlisten konnten nicht geladen werden. Bitte überprüfe die Konsole für Details. (${error.message})`;
-                setup.errorMessage.style.display = 'block';
-                setup.startGameBtn.disabled = true; // Spielstart verhindern
-                throw error; // Stoppt die weitere Ausführung
+        async function loadWordData() { /*...*/ } // Unverändert
+        
+        function updateSetupUI() {
+            setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
+            setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
+            setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud');
+            setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading');
+            setup.speedValue.textContent = state.readingSpeed;
+            
+            // Wortwolke-UI
+            setup.baseSpeedSlider.value = state.baseAnimationSpeed;
+            setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's';
+            setup.speedVarianceSlider.value = state.speedVariance;
+            setup.speedVarianceValue.textContent = `±${state.speedVariance}%`;
+            
+            // NEUE UI-AKTUALISIERUNG
+            setup.targetFrequencySlider.value = state.targetWordFrequency;
+            setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`;
+        }
+
+        function spawnWordRain() {
+            if (document.hidden) return;
+            const now = Date.now();
+            const freeLanes = [];
+            for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); }
+            if (freeLanes.length === 0) return;
+
+            // --- NEUE LOGIK ZUR WORTAUSWAHL ---
+            let wordToSpawn;
+            const probabilityThreshold = state.targetWordFrequency / 100; // z.B. 0.3
+
+            if (Math.random() < probabilityThreshold) {
+                // Nimm das Zielwort
+                wordToSpawn = state.targetWord;
+            } else {
+                // Nimm ein zufälliges Ablenkerwort
+                const distractors = state.wordList.filter(w => w !== state.targetWord);
+                if (distractors.length > 0) {
+                    wordToSpawn = distractors[Math.floor(Math.random() * distractors.length)];
+                } else {
+                    // Fallback, falls es nur ein Wort in der Liste gibt
+                    wordToSpawn = state.targetWord;
+                }
             }
+            // --- ENDE DER NEUEN LOGIK ---
+
+            const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)];
+            const el = document.createElement('div');
+            el.textContent = wordToSpawn; // Verwende das ausgewählte Wort
+            el.classList.add('game-word');
+            
+            const areaRect = game.area.getBoundingClientRect();
+            const laneHeight = areaRect.height / state.numLanes;
+            el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`;
+            const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100);
+            const randomDeviation = (Math.random() * 2 - 1) * varianceAmount;
+            const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation);
+            game.area.appendChild(el);
+            const wordWidth = el.offsetWidth;
+            const pixelsPerSecond = areaRect.width / (finalAnimationDuration / 1000);
+            const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
+            state.laneStates[laneIndex] = now + clearanceTime * 1000;
+            el.classList.add('word-fly-in');
+            el.style.animationDuration = `${finalAnimationDuration}ms`;
+            el.addEventListener('click', handleWordClick);
+            setTimeout(() => el.remove(), finalAnimationDuration);
         }
 
-        // --- UI & SELEKTOR-LOGIK --- (leicht angepasst)
-        function populateTopicSelector() {
-            Object.keys(WORD_DATA).forEach(topicName => {
-                const option = document.createElement('option');
-                option.value = topicName;
-                option.textContent = topicName;
-                setup.topicSelector.appendChild(option);
-            });
-        }
-        function updateListSelector() { /*...unverändert...*/ } // (Die Funktion selbst ist identisch)
-        
-        // --- HAUPTFUNKTIONEN --- (unverändert)
-        function startGame() { /*...unverändert...*/ }
-        
-        // --- INITIALISIERUNG --- (NEUE STRUKTUR)
         async function initializeApp() {
+            // Lade-Logik bleibt gleich, aber neuer Listener wird hinzugefügt
             await loadWordData();
-            // Dieser Code wird erst ausgeführt, wenn alle JSONs geladen sind.
             populateTopicSelector();
-            updateListSelector(); // Fülle die Listen für das erste Thema
+            updateListSelector();
             updateSetupUI();
             
-            // Event Listeners hier registrieren, da sie auf die UI angewiesen sind.
             setup.topicSelector.addEventListener('change', updateListSelector);
             setup.modeWordCloudBtn.addEventListener('click', () => { state.gameMode = 'wordcloud'; updateSetupUI(); });
-            // ... (restliche Listener bleiben gleich)
             setup.modeReadingBtn.addEventListener('click', () => { state.gameMode = 'reading'; updateSetupUI(); });
             setup.speedIncreaseBtn.addEventListener('click', () => { if (state.readingSpeed < 10) state.readingSpeed++; updateSetupUI(); });
             setup.speedDecreaseBtn.addEventListener('click', () => { if (state.readingSpeed > 1) state.readingSpeed--; updateSetupUI(); });
             setup.baseSpeedSlider.addEventListener('input', (e) => { state.baseAnimationSpeed = parseInt(e.target.value); updateSetupUI(); });
             setup.speedVarianceSlider.addEventListener('input', (e) => { state.speedVariance = parseInt(e.target.value); updateSetupUI(); });
+            
+            // NEUER LISTENER
+            setup.targetFrequencySlider.addEventListener('input', (e) => {
+                state.targetWordFrequency = parseInt(e.target.value);
+                updateSetupUI();
+            });
+
             setup.startGameBtn.addEventListener('click', startGame);
             game.exitBtn.addEventListener('click', () => { clearInterval(state.gameInterval); showScreen('setup'); });
             gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
         }
 
-        // Starte die gesamte Anwendung
-        initializeApp().catch(error => {
-            // Fehler wurde bereits in loadWordData behandelt, aber wir fangen ihn hier sicherheitshalber nochmal.
-            console.error("Initialisierung der App fehlgeschlagen.");
-        });
+        initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
 
-        // Alle restlichen Funktionen bleiben identisch, daher hier zur Kürze weggelassen,
-        // sie sind aber im finalen Code oben enthalten.
+        // Dummy-Funktionen und unveränderter Code zur Vollständigkeit
+        async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. (${error.message})`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
+        function populateTopicSelector() { Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
         function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
-        function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.speedValue.textContent = state.readingSpeed; setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; }
-        function startGame() { const selectedTopic = setup.topicSelector.value; const selectedList = setup.listSelector.value; const wordList = WORD_DATA[selectedTopic][selectedList]; if (!wordList || wordList.length < 5) { setup.errorMessage.textContent = "Die ausgewählte Liste enthält nicht genügend Elemente (mindestens 5 benötigt)."; setup.errorMessage.style.display = 'block'; return; } setup.errorMessage.style.display = 'none'; state.wordList = wordList; state.level = 1; state.hits = 0; state.usedTargetWords = []; showScreen('game'); startLevel(); }
+        function startGame() { const selectedTopic = setup.topicSelector.value; const selectedList = setup.listSelector.value; const wordList = WORD_DATA[selectedTopic][selectedList]; if (!wordList || wordList.length < 5) { setup.errorMessage.textContent = "Die Liste muss mindestens 5 Elemente enthalten."; setup.errorMessage.style.display = 'block'; return; } setup.errorMessage.style.display = 'none'; state.wordList = wordList; state.level = 1; state.hits = 0; state.usedTargetWords = []; showScreen('game'); startLevel(); }
         function startLevel() { if (state.usedTargetWords.length >= state.wordList.length) { endGame(); return; } let availableWords = state.wordList.filter(w => !state.usedTargetWords.includes(w)); state.targetWord = availableWords[Math.floor(Math.random() * availableWords.length)]; state.usedTargetWords.push(state.targetWord); state.hits = 0; updateHUD(); game.area.innerHTML = ''; clearInterval(state.gameInterval); if (state.gameMode === 'wordcloud') startWordCloudMode(); else startReadingMode(); }
         function updateHUD() { game.levelDisplay.textContent = `Level: ${state.level}`; game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`; game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`; game.targetWordDisplay.style.visibility = 'visible'; }
         function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.gameInterval = setInterval(spawnWordRain, 350); }
-        function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const word = state.wordList[Math.floor(Math.random() * state.wordList.length)]; const el = document.createElement('div'); el.textContent = word; el.classList.add('game-word'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = areaRect.width / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; el.classList.add('word-fly-in'); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('click', handleWordClick); setTimeout(() => el.remove(), finalAnimationDuration); }
-        function startReadingMode() { /* Unverändert */ }
+        function startReadingMode() {}
         function handleWordClick(e) { const el = e.target; el.style.pointerEvents = 'none'; if (el.textContent === state.targetWord) { state.hits++; el.classList.add('correct'); updateHUD(); if (state.hits >= state.hitsNeeded) setTimeout(startLevel, 1000); } else { el.classList.add('incorrect', 'shake'); } setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500); }
         function endGame() { clearInterval(state.gameInterval); showScreen('gameOver'); }
+        function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => alert(`Fehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
     });
     </script>
 </body>
