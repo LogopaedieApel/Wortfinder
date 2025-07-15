@@ -5,19 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
     <style>
-        /* CSS-Variablen und grundlegende Stile */
         :root {
             --primary-color: #FF8C00; --background-color: #1a1a1a; --container-bg-color: #2b2b2b; --text-color: #f0f0f0; --success-color: #4CAF50; --error-color: #f44336;
             --border-color: #444; --button-bg: #333; --button-hover-bg: #555; --active-bg: var(--primary-color); --active-text: #000;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; 
+               /* NEU: Stellt sicher, dass der verkleinerte .screen zentriert wird */
+               display: flex; align-items: center; justify-content: center; min-height: 100vh;
+        }
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--background-color); /* Hintergrund für den Container */
+
+            /* --- HIER IST DIE ANPASSUNG FÜR DIE SKALIERUNG --- */
+            /* Manuell anpassbar: z.B. 95vh/95vw oder 90vh/90vw */
+            height: 95vh;
+            width: 95vw;
+            
+            /* Optional: Schöne abgerundete Ecken und ein Schatten für mehr Tiefe */
+            border-radius: 15px; 
+            box-shadow: 0 0 25px rgba(0,0,0,0.6); 
+            
+            padding: 20px;
+            position: relative; /* Wichtig für die Positionierung von Inhalten darin */
+        }
         .screen.active { display: flex; }
         h1 { color: var(--primary-color); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; font-size: 2.5em; }
         
-        /* Setup-Screen unverändert */
         #setup-screen .container { background-color: var(--container-bg-color); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); max-width: 600px; width: 100%; }
+        /* Der Rest des CSS bleibt größtenteils gleich... */
         .selector-group { display: flex; gap: 15px; margin-bottom: 20px; }
         .selector-group > div { flex: 1; }
         select { width: 100%; padding: 10px; font-size: 1em; background-color: #1e1e1e; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; }
@@ -42,15 +61,17 @@
         .btn-secondary { background-color: var(--button-bg); color: var(--text-color); }
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
-        /* Game-Screen Layout Anpassungen */
         #game-screen {
             justify-content: flex-start;
-            padding: 0; /* GEÄNDERT: Kein Padding mehr am Hauptscreen */
+            padding: 0;
+            overflow: hidden;
         }
         #game-hud {
-            position: relative; /* GEÄNDERT: Nicht mehr 'fixed' */
-            flex-shrink: 0; /* GEÄNDERT: HUD soll nicht schrumpfen */
+            width: 100%;
+            flex-shrink: 0;
             padding: 10px 20px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 15px 15px 0 0;
         }
         #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; } #game-stats span { font-size: 1.2em; }
         #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
@@ -58,67 +79,50 @@
         #game-area {
             position: relative;
             width: 100%;
-            flex-grow: 1; /* GEÄNDERT: Nimmt den gesamten restlichen Platz ein */
-            overflow: hidden; /* GEÄNDERT: Verhindert jegliches Scrollen, auch bei Fehlern */
-            margin-top: 0; /* GEÄNDERT: Flexbox erledigt die Positionierung */
+            flex-grow: 1; 
+            overflow: hidden;
         }
         
-        /* Wortwolke-Modus Stile */
-        .game-word {
-            position: absolute; padding: 5px 10px; /* Etwas kleiner für mehr Flexibilität */
-            background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px;
-            cursor: pointer; user-select: none;
-            font-size: 4vmin; /* NEU: Responsive Schriftgröße */
-            transition: transform 0.2s, background-color 0.3s;
-        }
+        .game-word { position: absolute; padding: 5px 10px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 4vmin; transition: transform 0.2s, background-color 0.3s; }
         .game-word:hover { transform: scale(1.1); border-color: var(--primary-color); }
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 
-        /* Lesemodus Stile */
-        #game-area.reading-mode-active {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2vw; /* NEU: Responsiver Abstand */
-            overflow: hidden; /* GEÄNDERT: Kein 'auto' mehr, um Scrollen zu verhindern */
-        }
-        #reading-page-container {
-            background-color: var(--container-bg-color);
-            padding: 2vmin 3vmin; /* NEU: Responsives Padding */
-            border-radius: 10px;
-            width: 100%;
-            height: 100%;
-            line-height: 2.2; /* Etwas kompakter */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            text-align: justify;
-            overflow: hidden; /* Sicher ist sicher */
-        }
-        .reading-word {
-            display: inline-block;
-            font-size: 2.5vmin; /* NEU: Responsive Schriftgröße, passt sich dem Bildschirm an */
-            padding: 0 0.5vmin;
-            margin: 0 0.5vmin;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.2s, color 0.2s;
-            user-select: none;
-        }
+        #game-area.reading-mode-active { display: flex; justify-content: center; align-items: center; padding: 2vw; }
+        #reading-page-container { background-color: var(--container-bg-color); padding: 2vmin 3vmin; border-radius: 10px; width: 100%; height: 100%; line-height: 2.2; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: justify; overflow: hidden; }
+        .reading-word { display: inline-block; font-size: 2.5vmin; padding: 0 0.5vmin; margin: 0 0.5vmin; cursor: pointer; border-radius: 4px; transition: background-color 0.2s, color 0.2s; user-select: none; }
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
         
-        /* Allgemeine Effekte & Animationen */
         .fade-out { animation: fade-out-anim 0.3s forwards; } @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
         .correct { background-color: var(--success-color) !important; color: white !important; } 
         .incorrect { background-color: var(--error-color) !important; color: white !important; }
         .shake { animation: shake-anim 0.5s; } @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
         
+        #game-over-screen {
+            justify-content: center;
+        }
         #game-over-screen h1 { font-size: 3em; }
     </style>
 </head>
 <body>
 
-    <!-- HTML-Struktur bleibt unverändert -->
+    <!-- HTML bleibt unverändert -->
+    <div id="setup-screen" class="screen active">
+        <!-- ... -->
+    </div>
+    
+    <div id="game-screen" class="screen">
+        <!-- ... -->
+    </div>
+    <div id="game-over-screen" class="screen">
+        <!-- ... -->
+    </div>
+
+    <!-- Dein komplettes JavaScript bleibt hier unverändert -->
+    <script>
+        // ... (Der gesamte JavaScript-Code von der vorherigen Version)
+    </script>
     <div id="setup-screen" class="screen active">
         <div class="container">
             <h1 id="main-title">Wortfinder: Setup</h1>
@@ -149,7 +153,6 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Setup- und State-Deklarationen bleiben größtenteils gleich
         let WORD_DATA = {};
         const TOPICS_TO_LOAD = { "Artikulation": "artikulation.json", "Wortschatz": "wortschatz.json", "Lesen": "lesen.json" };
         const screens = { setup: document.getElementById('setup-screen'), game: document.getElementById('game-screen'), gameOver: document.getElementById('game-over-screen') };
@@ -173,10 +176,8 @@
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
 
-        // --- Die `startWordCloudMode` Funktion wird angepasst ---
         function startWordCloudMode() {
-            // NEU: Dynamische Berechnung der Lanes basierend auf der verfügbaren Höhe
-            const laneHeight = 60; // Mindesthöhe für eine Lane in px
+            const laneHeight = 60; 
             state.numLanes = Math.max(3, Math.floor(game.area.offsetHeight / laneHeight));
 
             state.laneStates = Array(state.numLanes).fill(0);
@@ -184,9 +185,6 @@
             updateHUD();
             state.gameInterval = setInterval(spawnWordRain, 350);
         }
-
-        // --- Der Rest des JavaScripts, die unveränderten Teile sind hier zur Vollständigkeit ---
-        // Die Logik für spawnWordRain, handle-clicks, etc. bleibt gleich, profitiert aber von den CSS- und Layout-Änderungen.
 
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
@@ -216,7 +214,10 @@
 
             setup.startGameBtn.addEventListener('click', startGame);
             game.exitBtn.addEventListener('click', () => { clearInterval(state.gameInterval); showScreen('setup'); });
-            gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
+            gameOver.restartBtn.addEventListener('click', () => {
+                // Beim Neustart auch den setup-Screen wieder aktivieren
+                showScreen('setup');
+            });
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
         }
         
@@ -330,14 +331,12 @@
         }
         
         function startReadingMode() {
-            // NEU: Dynamische Wortanzahl. Wir füllen, bis der Container voll ist.
             const pageContainer = document.createElement('div');
             pageContainer.id = 'reading-page-container';
             game.area.appendChild(pageContainer);
 
-            // Kurz warten, damit der Browser die responsive Größe berechnen kann
             requestAnimationFrame(() => {
-                const TOTAL_WORDS = 150; // Startwert, wird evtl. nicht erreicht
+                const TOTAL_WORDS = 150;
                 const TARGET_COUNT = 15;
                 state.hitsNeeded = TARGET_COUNT;
 
@@ -350,7 +349,6 @@
                 shuffleArray(wordsForPage);
 
                 wordsForPage.forEach(word => {
-                    // Stoppe das Hinzufügen, wenn der Container fast voll ist
                     if (pageContainer.scrollHeight > pageContainer.clientHeight) return;
                     
                     const wordSpan = document.createElement('span');
@@ -389,7 +387,13 @@
         async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
         function populateTopicSelector() { Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
-        function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
+        function showScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            const screenToShow = screens[screenName];
+            if (screenToShow) {
+                screenToShow.classList.add('active');
+            }
+        }
         function endGame() { clearInterval(state.gameInterval); showScreen('gameOver'); }
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
 
