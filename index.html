@@ -149,6 +149,8 @@
             speedVariance: 20, targetWordFrequency: 30,
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
+
+        // ... der Rest deines JavaScript-Codes bleibt identisch ...
         
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
@@ -236,7 +238,6 @@
             state.gameInterval = setInterval(spawnWordRain, 350);
         }
 
-        // --- START DER KORRIGIERTEN FUNKTION ---
         function spawnWordRain() {
             if (document.hidden) return;
             const now = Date.now();
@@ -276,18 +277,14 @@
             const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
             state.laneStates[laneIndex] = now + clearanceTime * 1000;
             
-            // GEÄNDERT: Speichere den Timer in einer Eigenschaft des Elements
-            el.removalTimer = setTimeout(() => el.remove(), finalAnimationDuration);
+            setTimeout(() => el.remove(), finalAnimationDuration);
         }
 
-        // --- START DER KORRIGIERTEN FUNKTION ---
         function handleWordCloudClick(e) {
             const el = e.target;
             
-            // NEU: Breche den ursprünglichen "am Ende entfernen"-Timer ab
-            clearTimeout(el.removalTimer);
-
-            // NEU: Stoppe die Flug-Animation sofort. Dies ist der wichtigste Teil gegen den visuellen Fehler.
+            // KORREKTUR: Animation stoppen und Position einfrieren, um den "Blitz"-Effekt zu verhindern.
+            el.style.transform = getComputedStyle(el).transform;
             el.style.animation = 'none';
 
             el.style.pointerEvents = 'none';
