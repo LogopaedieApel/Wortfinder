@@ -83,7 +83,7 @@
         .reading-word {
             display: grid;
             place-items: center;
-            font-size: clamp(14px, 5vmin, 70px);
+            /* font-size wird nun dynamisch per JavaScript gesetzt, um Überlaufen zu verhindern */
             cursor: pointer;
             border-radius: 4px;
             transition: background-color 0.2s, color 0.2s;
@@ -156,7 +156,6 @@
         let WORD_DATA = {};
         const TOPICS_TO_LOAD = { "Artikulation": "artikulation.json", "Wortschatz": "wortschatz.json", "Lesen": "lesen.json" };
         
-        // NEU: Konfiguration für die Rastergrößen
         const GRID_CONFIGS = {
             small:  { rows: 5, cols: 8,  total: 40 },
             medium: { rows: 7, cols: 10, total: 70 },
@@ -174,7 +173,6 @@
             speedVarianceValue: document.getElementById('speed-variance-value'),
             targetFrequencySlider: document.getElementById('target-frequency-slider'),
             targetFrequencyValue: document.getElementById('target-frequency-value'),
-            // NEU: Buttons für die Rastergröße
             gridSmallBtn: document.getElementById('grid-small'),
             gridMediumBtn: document.getElementById('grid-medium'),
             gridLargeBtn: document.getElementById('grid-large'),
@@ -185,7 +183,7 @@
         let state = {
             gameMode: 'wordcloud', numLanes: 7, laneStates: [], baseAnimationSpeed: 10000,
             speedVariance: 20, targetWordFrequency: 30,
-            readingGridSize: 'medium', // NEU: State für Rastergröße
+            readingGridSize: 'medium', 
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
 
@@ -201,7 +199,6 @@
             setup.targetFrequencySlider.value = state.targetWordFrequency;
             setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`;
             
-            // NEU: UI für Rastergröße aktualisieren
             setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small');
             setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium');
             setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large');
@@ -220,7 +217,6 @@
             setup.speedVarianceSlider.addEventListener('input', (e) => { state.speedVariance = parseInt(e.target.value); updateSetupUI(); });
             setup.targetFrequencySlider.addEventListener('input', (e) => { state.targetWordFrequency = parseInt(e.target.value); updateSetupUI(); });
 
-            // NEU: Event Listeners für Raster-Buttons
             setup.gridSmallBtn.addEventListener('click', () => { state.readingGridSize = 'small'; updateSetupUI(); });
             setup.gridMediumBtn.addEventListener('click', () => { state.readingGridSize = 'medium'; updateSetupUI(); });
             setup.gridLargeBtn.addEventListener('click', () => { state.readingGridSize = 'large'; updateSetupUI(); });
@@ -350,8 +346,16 @@
             setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
         }
         
-        // NEU GESTALTET: Lesemodus-Logik
-        function startReadingMode() {
+        // =========================================================================
+        // NEU GESTALTETE Lesemodus-Logik mit dynamischer Schriftgröße
+        // =========================================================================
+        async function startReadingMode() {
+            game.area.innerHTML = ''; 
+            updateHUD(); 
+
+            // Kurze Verzögerung, damit das DOM sich aktualisieren kann, bevor wir messen.
+            await new Promise(resolve => setTimeout(resolve, 0)); 
+
             const config = GRID_CONFIGS[state.readingGridSize];
             const TOTAL_WORDS = config.total;
             const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17)));
@@ -364,17 +368,24 @@
                 wordsForPage.push(state.targetWord);
             }
             for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
-                if (distractors.length > 0) {
-                    wordsForPage.push(distractors[Math.floor(Math.random() * distractors.length)]);
-                } else {
-                    wordsForPage.push(state.targetWord);
-                }
+                wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord);
             }
             shuffleArray(wordsForPage);
 
+            // 1. Finde das längste Wort in der aktuellen Liste
+            const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, "");
+
+            // 2. Berechne die verfügbare Breite einer einzelnen Zelle
+            const gameAreaRect = game.area.getBoundingClientRect();
+            const cellPadding = 10; // Ein kleiner Puffer in Pixeln
+            const cellWidth = (gameAreaRect.width / config.cols) - cellPadding;
+            const cellHeight = (gameAreaRect.height / config.rows) - cellPadding;
+
+            // 3. Finde die optimale, einheitliche Schriftgröße
+            const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight);
+
             const pageContainer = document.createElement('div');
             pageContainer.id = 'reading-page-container';
-            
             pageContainer.style.setProperty('--grid-rows', config.rows);
             pageContainer.style.setProperty('--grid-cols', config.cols);
 
@@ -383,12 +394,16 @@
                 wordSpan.textContent = word;
                 wordSpan.classList.add('reading-word');
                 wordSpan.addEventListener('click', handleReadingWordClick);
+                
+                // 4. Wende die berechnete, einheitliche Schriftgröße auf jedes Wort an
+                wordSpan.style.fontSize = `${optimalFontSize}px`;
+
                 pageContainer.appendChild(wordSpan);
             });
+            
             game.area.appendChild(pageContainer);
             updateHUD();
         }
-
 
         function handleReadingWordClick(e) {
             const el = e.target;
@@ -415,6 +430,28 @@
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
+        }
+
+        // NEUE HELFER-FUNKTION zum Berechnen der optimalen Schriftgröße
+        function calculateOptimalFontSize(text, maxWidth, maxHeight) {
+            const meter = document.createElement('span');
+            meter.style.position = 'absolute';
+            meter.style.visibility = 'hidden';
+            meter.style.whiteSpace = 'nowrap';
+            meter.textContent = text;
+            document.body.appendChild(meter);
+
+            let fontSize = 100; // Beginne mit einer großen Schriftgröße
+            meter.style.fontSize = `${fontSize}px`;
+            
+            // Verkleinere die Schriftgröße, bis der Text in Breite UND Höhe passt
+            while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) {
+                fontSize--;
+                meter.style.fontSize = `${fontSize}px`;
+            }
+
+            document.body.removeChild(meter); // Räume die "Messlatte" wieder auf
+            return Math.max(fontSize, 8); // Gib eine Mindestgröße zurück
         }
 
         async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
