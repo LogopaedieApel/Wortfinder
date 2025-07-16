@@ -326,6 +326,13 @@
 
         function handleWordCloudClick(e) {
             const el = e.target;
+            
+            // >> DIESE ZEILEN SIND NEU UND WICHTIG <<
+            // Verhindert die doppelte Ausführung des Codes bei Geräten,
+            // die sowohl touchstart als auch pointerdown auslösen.
+            if (el.dataset.clicked) return; // Wenn schon geklickt, Funktion sofort beenden.
+            el.dataset.clicked = 'true';    // Das Element als "geklickt" markieren.
+            
             el.style.transform = getComputedStyle(el).transform;
             el.style.animation = 'none';
 
