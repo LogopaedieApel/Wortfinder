@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
+
+    <!-- NEU: PWA / "Zum Home-Bildschirm hinzufügen" Konfiguration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF8C00">
+
+    <!-- NEU: Speziell für Apple-Geräte (iOS/iPadOS) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wortfinder">
+    <link rel="apple-touch-icon" href="icon-192x192.png"> <!-- Wichtig: Icon-Datei muss existieren -->
+
     <style>
         /* CSS-Variablen und grundlegende Stile */
         :root {
@@ -55,45 +66,12 @@
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 
-        /* NEU: Lesemodus Stile */
-        #game-area.reading-mode-active {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow: hidden; 
-        }
-        #reading-page-container {
-            background-color: var(--container-bg-color);
-            padding: 20px; /* Padding leicht reduziert */
-            border-radius: 10px;
-            max-width: 950px; /* Etwas breiter erlaubt */
-            width: 100%;
-            line-height: 2.2; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            text-align: justify;
-            max-height: 100%; 
-            overflow: hidden; 
-        }
-        .reading-word {
-            display: inline-block;
-            /* GEÄNDERT: clamp() sorgt für eine responsive Schriftgröße mit Min/Max-Werten */
-            font-size: clamp(16px, 2.5vmin, 26px);
-            padding: 2px 6px;
-            margin: 0 4px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.2s, color 0.2s;
-            user-select: none;
-        }
-        .reading-word:hover {
-            background-color: var(--button-hover-bg);
-        }
-        .reading-word.correct { 
-            background-color: var(--success-color) !important;
-            color: white !important;
-            cursor: default;
-        }
+        /* Lesemodus Stile */
+        #game-area.reading-mode-active { display: flex; justify-content: center; align-items: center; padding: 20px; overflow: hidden; }
+        #reading-page-container { background-color: var(--container-bg-color); padding: 20px; border-radius: 10px; max-width: 950px; width: 100%; line-height: 2.2; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: justify; max-height: 100%; overflow: hidden; }
+        .reading-word { display: inline-block; font-size: clamp(16px, 2.5vmin, 26px); padding: 2px 6px; margin: 0 4px; cursor: pointer; border-radius: 4px; transition: background-color 0.2s, color 0.2s; user-select: none; }
+        .reading-word:hover { background-color: var(--button-hover-bg); }
+        .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
         
         /* Allgemeine Effekte & Animationen */
         .fade-out { animation: fade-out-anim 0.3s forwards; } @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
@@ -136,6 +114,18 @@
     <div id="game-over-screen" class="screen"><h1>Spiel vorbei!</h1><p>Du hast alle Wörter gemeistert.</p><button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button></div>
 
     <script>
+    // NEU: Service Worker Registrierung
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Der Pfad muss zum Speicherort der sw.js-Datei passen
+        navigator.serviceWorker.register('./sw.js').then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }, err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         let WORD_DATA = {};
         const TOPICS_TO_LOAD = { "Artikulation": "artikulation.json", "Wortschatz": "wortschatz.json", "Lesen": "lesen.json" };
@@ -160,6 +150,8 @@
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
 
+        // ... der Rest deines JavaScript-Codes bleibt identisch ...
+        
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
             setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
@@ -192,8 +184,6 @@
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
         }
         
-        // --- Game Logic ---
-
         function startGame() {
             const selectedTopic = setup.topicSelector.value;
             const selectedList = setup.listSelector.value;
@@ -240,8 +230,6 @@
             game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`;
             game.targetWordDisplay.style.visibility = 'visible';
         }
-
-        // --- Wortwolke Modus ---
 
         function startWordCloudMode() {
             state.laneStates = Array(state.numLanes).fill(0);
@@ -312,12 +300,9 @@
             setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
         }
         
-        // --- Lesemodus ---
-
         function startReadingMode() {
-            // GEÄNDERT: Wortanzahl reduziert für bessere Passform auf Tablets
             const TOTAL_WORDS = 80; 
-            const TARGET_COUNT = 12; // Angepasst an die neue Gesamtzahl
+            const TARGET_COUNT = 12;
             state.hitsNeeded = TARGET_COUNT;
 
             const distractors = state.wordList.filter(w => w !== state.targetWord);
@@ -329,12 +314,9 @@
                    wordsForPage.push(distractors[Math.floor(Math.random() * distractors.length)]);
                 }
             }
-
             shuffleArray(wordsForPage);
-
             const pageContainer = document.createElement('div');
             pageContainer.id = 'reading-page-container';
-
             wordsForPage.forEach(word => {
                 const wordSpan = document.createElement('span');
                 wordSpan.textContent = word;
@@ -342,7 +324,6 @@
                 wordSpan.addEventListener('click', handleReadingWordClick);
                 pageContainer.appendChild(wordSpan);
             });
-
             game.area.appendChild(pageContainer);
             updateHUD();
         }
@@ -350,13 +331,11 @@
         function handleReadingWordClick(e) {
             const el = e.target;
             if (el.classList.contains('correct')) return;
-
             if (el.textContent === state.targetWord) {
                 el.classList.add('correct');
                 el.classList.remove('incorrect', 'shake');
                 state.hits++;
                 updateHUD();
-
                 if (state.hits >= state.hitsNeeded) {
                     setTimeout(() => {
                         state.level++;
@@ -368,8 +347,6 @@
                 setTimeout(() => el.classList.remove('incorrect', 'shake'), 500);
             }
         }
-
-        // --- Hilfsfunktionen & Rest ---
         
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
