@@ -268,7 +268,7 @@
             const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation);
             
             el.style.animationDuration = `${finalAnimationDuration}ms`;
-            el.addEventListener('click', handleWordCloudClick);
+            el.addEventListener('pointerdown', handleWordCloudClick);
             
             game.area.appendChild(el);
             
