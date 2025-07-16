@@ -1,0 +1,21 @@
+{
+  "name": "Wortfinder Spiel",
+  "short_name": "Wortfinder",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#FF8C00",
+  "description": "Ein Spiel zum Finden von Wörtern in einer Wolke oder einem Text.",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
