@@ -312,6 +312,7 @@
             
             el.style.animationDuration = `${finalAnimationDuration}ms`;
             el.addEventListener('pointerdown', handleWordCloudClick);
+            el.addEventListener('touchstart', handleWordCloudClick, { passive: true });
             
             game.area.appendChild(el);
             
