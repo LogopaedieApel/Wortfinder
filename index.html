@@ -280,15 +280,22 @@
             setTimeout(() => el.remove(), finalAnimationDuration);
         }
 
+        // ---------- START DER KORREKTUR ----------
         function handleWordCloudClick(e) {
             const el = e.target;
+            
+            // 1. Sofort Interaktionen verhindern und die Bewegung an der aktuellen Position "einfrieren".
             el.style.pointerEvents = 'none';
+            el.style.animationPlayState = 'paused'; // WICHTIG: Stoppt die "fly-across"-Animation sofort.
+
+            // 2. Visuelles Feedback geben (Farbe, Wackeln)
             if (el.textContent === state.targetWord) {
                 state.hits++;
                 el.classList.add('correct');
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
                     clearInterval(state.gameInterval);
+                    // Kurze Pause, bevor das nächste Level startet, damit der letzte Treffer sichtbar ist.
                     setTimeout(() => {
                         state.level++;
                         startLevel();
@@ -297,8 +304,16 @@
             } else {
                 el.classList.add('incorrect', 'shake');
             }
-            setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
+
+            // 3. Verzögertes Ausblenden und Entfernen
+            // Die .fade-out Klasse überschreibt jetzt die *pausierte* Animation, was sicher ist.
+            setTimeout(() => {
+                el.classList.add('fade-out');
+                // Nach der fade-out Animation (300ms) das Element sicher aus dem DOM entfernen.
+                setTimeout(() => el.remove(), 300);
+            }, 500); // 500ms warten, damit der Spieler die Farbänderung/das Wackeln sieht.
         }
+        // ---------- ENDE DER KORREKTUR ----------
         
         function startReadingMode() {
             const TOTAL_WORDS = 80; 
