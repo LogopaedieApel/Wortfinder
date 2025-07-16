@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
 
-    <!-- NEU: PWA / "Zum Home-Bildschirm hinzufügen" Konfiguration -->
+    <!-- PWA / "Zum Home-Bildschirm hinzufügen" Konfiguration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF8C00">
 
-    <!-- NEU: Speziell für Apple-Geräte (iOS/iPadOS) -->
+    <!-- Speziell für Apple-Geräte (iOS/iPadOS) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Wortfinder">
-    <link rel="apple-touch-icon" href="icon-192x192.png"> <!-- Wichtig: Icon-Datei muss existieren -->
+    <link rel="apple-touch-icon" href="icon-192x192.png">
 
     <style>
         /* CSS-Variablen und grundlegende Stile */
@@ -23,7 +23,7 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; /* GEÄNDERT: dvh statt vh für mobile Browser */ width: 100vw; padding: 20px; }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; width: 100vw; padding: 20px; }
         .screen.active { display: flex; }
         h1 { color: var(--primary-color); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; font-size: 2.5em; }
         
@@ -74,7 +74,6 @@
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
         
         /* Allgemeine Effekte & Animationen */
-        .fade-out { animation: fade-out-anim 0.3s forwards; } @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
         .correct { background-color: var(--success-color) !important; color: white !important; } 
         .incorrect { background-color: var(--error-color) !important; color: white !important; }
         .shake { animation: shake-anim 0.5s; } @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
@@ -114,10 +113,8 @@
     <div id="game-over-screen" class="screen"><h1>Spiel vorbei!</h1><p>Du hast alle Wörter gemeistert.</p><button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button></div>
 
     <script>
-    // NEU: Service Worker Registrierung
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        // Der Pfad muss zum Speicherort der sw.js-Datei passen
         navigator.serviceWorker.register('./sw.js').then(registration => {
           console.log('ServiceWorker registration successful with scope: ', registration.scope);
         }, err => {
@@ -149,8 +146,6 @@
             speedVariance: 20, targetWordFrequency: 30,
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
-
-        // ... der Rest deines JavaScript-Codes bleibt identisch ...
         
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
@@ -277,25 +272,36 @@
             const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
             state.laneStates[laneIndex] = now + clearanceTime * 1000;
             
-            setTimeout(() => el.remove(), finalAnimationDuration);
+            setTimeout(() => {
+                // Nur entfernen, wenn es noch im DOM ist (nicht schon geklickt wurde)
+                if (el.parentElement) {
+                    el.remove();
+                }
+            }, finalAnimationDuration);
         }
 
-        // ---------- START DER KORREKTUR ----------
+        // ---------- START DER FINALEN KORREKTUR ----------
         function handleWordCloudClick(e) {
             const el = e.target;
-            
-            // 1. Sofort Interaktionen verhindern und die Bewegung an der aktuellen Position "einfrieren".
+            // Klicks sofort deaktivieren
             el.style.pointerEvents = 'none';
-            el.style.animationPlayState = 'paused'; // WICHTIG: Stoppt die "fly-across"-Animation sofort.
 
-            // 2. Visuelles Feedback geben (Farbe, Wackeln)
+            // 1. "FOTO MACHEN": Aktuelle Position auslesen, bevor irgendetwas passiert.
+            const computedStyle = window.getComputedStyle(el);
+            const currentTransform = computedStyle.transform;
+            
+            // 2. "POSITION EINFRIEREN": Die Flug-Animation stoppen und die ausgelesene Position 
+            //    direkt als Inline-Style setzen. Das "klebt" das Element an seiner Stelle fest.
+            el.style.animation = 'none'; // Stoppt alle CSS-Animationen radikal
+            el.style.transform = currentTransform;
+
+            // 3. VISUELLES FEEDBACK: Farbe ändern und ggf. wackeln lassen.
             if (el.textContent === state.targetWord) {
                 state.hits++;
                 el.classList.add('correct');
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
                     clearInterval(state.gameInterval);
-                    // Kurze Pause, bevor das nächste Level startet, damit der letzte Treffer sichtbar ist.
                     setTimeout(() => {
                         state.level++;
                         startLevel();
@@ -305,15 +311,26 @@
                 el.classList.add('incorrect', 'shake');
             }
 
-            // 3. Verzögertes Ausblenden und Entfernen
-            // Die .fade-out Klasse überschreibt jetzt die *pausierte* Animation, was sicher ist.
+            // 4. SANFTES VERSCHWINDEN: Nach einer kurzen Pause, um das Feedback zu zeigen,
+            //    starten wir den Ausblend-Effekt per Transition.
             setTimeout(() => {
-                el.classList.add('fade-out');
-                // Nach der fade-out Animation (300ms) das Element sicher aus dem DOM entfernen.
-                setTimeout(() => el.remove(), 300);
-            }, 500); // 500ms warten, damit der Spieler die Farbänderung/das Wackeln sieht.
+                // Transitions für die Eigenschaften, die wir ändern wollen, aktivieren.
+                el.style.transition = 'transform 0.3s ease-in, opacity 0.3s ease-in';
+                
+                // Endzustand setzen. Die Transition animiert den Übergang dorthin.
+                // Wir fügen dem eingefrorenen Transform einen Skalierungs-Effekt hinzu.
+                el.style.transform = `${currentTransform} scale(0.5)`;
+                el.style.opacity = '0';
+                
+                // Element aus dem DOM entfernen, nachdem die Transition abgeschlossen ist.
+                setTimeout(() => {
+                    if (el.parentElement) {
+                        el.remove();
+                    }
+                }, 300);
+            }, 500);
         }
-        // ---------- ENDE DER KORREKTUR ----------
+        // ---------- ENDE DER FINALEN KORREKTUR ----------
         
         function startReadingMode() {
             const TOTAL_WORDS = 80; 
