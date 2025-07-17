@@ -1,7 +1,7 @@
 {
   "Buchstaben Plosive": ["P", "B", "T", "D", "K", "G"],
   "Buchstaben Frikative": ["sch", "ch", "s", "f"],
-  "Buchstaben Sonorante": ["L", "R", "M", "N"]
+  "Buchstaben Sonorante": ["L", "R", "M", "N"],
   "Wörter mit 'mm'": ["Sommer", "Nummer", "Flamme", "kommen", "Stimme", "Himmel", "immer", "Lamm", "Kamm", "Damm"],
   "Wörter mit 'tt'": ["Mitte", "Schatten", "bitte", "Mutter", "Butter", "Kette", "Wetter", "Blatt", "Gitter", "Schritt"],
   "Wörter mit 'ck'": ["Rücken", "Jacke", "Decke", "Zucker", "Socke", "locken", "drücken", "wecken", "Mücke", "Schnecke"],
