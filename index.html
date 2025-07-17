@@ -106,29 +106,30 @@
             white-space: nowrap;
             user-select: none;
             pointer-events: none;
-            /* Performance-Tipp: Sagt dem Browser, was sich ändern wird */
             will-change: transform;
-            /* Die Animation wird per JS mit individuellen Werten gestartet */
             animation-name: word-rain-fall;
             animation-timing-function: linear;
             animation-fill-mode: forwards; /* Bleibt am Endpunkt der Animation */
         }
+
+        /* --- NEUE, KORRIGIERTE ANIMATION --- */
         @keyframes word-rain-fall {
-            from {
-                /* Startet weit über dem Bildschirm und mit einer zufälligen Rotation */
-                transform: translateY(-150px) rotate(var(--start-rot));
+            0% {
+                /* Startet weit außerhalb des Bildschirms und komplett unsichtbar */
+                transform: translateY(-20vh) rotate(var(--start-rot));
                 opacity: 0;
             }
-            10% {
-                /* Wird schnell sichtbar */
+            5% {
+                /* Wird sichtbar, während es sich immer noch außerhalb befindet */
                 opacity: 1;
             }
-            to {
-                /* Fällt komplett durch den Bildschirm hindurch und rotiert dabei weiter */
-                transform: translateY(105dvh) rotate(var(--end-rot));
+            100% {
+                /* Fällt komplett durch den Bildschirm hindurch und verlässt ihn unten */
+                transform: translateY(110vh) rotate(var(--end-rot));
                 opacity: 1;
             }
         }
+        
         #game-over-content {
             display: none; /* Wird per JS auf 'flex' gesetzt, wenn die Animation läuft */
             flex-direction: column; align-items: center; justify-content: center;
@@ -466,7 +467,6 @@
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
         function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; }
         
-        // --- START: VERBESSERTE endGame Funktion (mit Garantie für Mindestanzahl) ---
         function endGame() {
             clearInterval(state.gameInterval);
             showScreen('gameOver');
@@ -475,29 +475,24 @@
             const container = document.getElementById('game-over-animation-container');
             const finalContent = document.getElementById('game-over-content');
             
-            // Container leeren und Inhalt verstecken für einen sauberen Start
             container.innerHTML = '';
             finalContent.style.display = 'none';
 
-            // Logik zur Sicherstellung von genügend Items für einen schönen "Regen"
-            const MIN_RAIN_ITEMS = 40; // Mindestanzahl für einen schönen "Regen"
-            const MAX_RAIN_ITEMS = 70; // Maximalanzahl zur Performance-Schonung
+            const MIN_RAIN_ITEMS = 40;
+            const MAX_RAIN_ITEMS = 70;
             let wordsToAnimate = [];
 
-            // Fange den Fall ab, dass die Liste aus irgendeinem Grund leer sein könnte
             if (state.wordList.length === 0) {
-                finalContent.style.display = 'flex'; // Zeige sofort Inhalt, da keine Animation möglich ist
+                finalContent.style.display = 'flex';
                 return;
             }
 
             if (state.wordList.length < MIN_RAIN_ITEMS) {
-                // Die Liste ist klein. Füllen wir die Animationsliste künstlich auf.
                 for (let i = 0; i < MIN_RAIN_ITEMS; i++) {
                     const randomWord = state.wordList[Math.floor(Math.random() * state.wordList.length)];
                     wordsToAnimate.push(randomWord);
                 }
             } else {
-                // Die Liste ist groß genug. Begrenzen wir sie auf das Maximum für die Performance.
                 wordsToAnimate = shuffleArray([...state.wordList]).slice(0, MAX_RAIN_ITEMS);
             }
             
@@ -506,12 +501,11 @@
                 el.textContent = word;
                 el.classList.add('rain-word');
 
-                // Generiere zufällige Werte für eine dynamische Animation
-                const delay = Math.random() * 2.5;      // Startverzögerung (bis zu 2.5s)
-                const duration = 3 + Math.random() * 2; // Dauer des Falls (3s bis 5s)
-                const startX = Math.random() * 95;      // Startposition X (in vw)
-                const fontSize = 1 + Math.random() * 2; // Schriftgröße (1em bis 3em)
-                const startRotation = -25 + Math.random() * 50; // Start-Rotation
+                const delay = Math.random() * 2.5;
+                const duration = 3 + Math.random() * 2;
+                const startX = Math.random() * 95;
+                const fontSize = 1 + Math.random() * 2;
+                const startRotation = -25 + Math.random() * 50;
                 const endRotation = startRotation + (-40 + Math.random() * 80);
 
                 el.style.setProperty('--start-rot', `${startRotation}deg`);
@@ -524,19 +518,15 @@
                 
                 container.appendChild(el);
 
-                // Entferne das Element, nachdem die Animation sicher abgeschlossen ist
                 setTimeout(() => {
                     if (el) el.remove();
                 }, (delay + duration) * 1000 + 200);
             });
 
-            // Zeige den finalen Inhalt erst an, nachdem die Animation begonnen hat
             setTimeout(() => {
                 finalContent.style.display = 'flex';
-            }, 3000); // 3 Sekunden warten, damit der Regen-Effekt gut sichtbar ist
+            }, 3000);
         }
-        // --- ENDE: VERBESSERTE endGame Funktion ---
-
 
         initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
     });
