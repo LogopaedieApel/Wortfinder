@@ -91,29 +91,56 @@
         .incorrect { background-color: var(--error-color) !important; color: white !important; }
         .shake { animation: shake-anim 0.5s; } @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
         
-        /* --- NEU: Game-Over Screen Stile --- */
+        /* --- START: VERBESSERTE Game-Over Screen Stile --- */
         #game-over-screen {
-            justify-content: flex-start; /* Container für Animation oben ausrichten */
+            justify-content: flex-start; /* Stellt sicher, dass der Animationscontainer den ganzen Platz hat */
             overflow: hidden; /* Verhindert Scrollbalken durch Off-Screen-Elemente */
         }
         #game-over-animation-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5;
         }
         .rain-word {
-            position: absolute; color: var(--primary-color); font-weight: bold; white-space: nowrap;
-            will-change: transform; /* Performance-Tipp: Sagt dem Browser, was sich ändern wird */
-            animation-name: word-rain-fall; animation-timing-function: linear; animation-fill-mode: forwards; /* Bleibt am Endpunkt der Animation */
+            position: absolute;
+            color: var(--primary-color);
+            font-weight: bold;
+            white-space: nowrap;
+            user-select: none;
+            pointer-events: none;
+            /* Performance-Tipp: Sagt dem Browser, was sich ändern wird */
+            will-change: transform;
+            /* Die Animation wird per JS mit individuellen Werten gestartet */
+            animation-name: word-rain-fall;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards; /* Bleibt am Endpunkt der Animation */
         }
         @keyframes word-rain-fall {
-            from { transform: translateY(-150px) rotate(var(--start-rot)); } /* Startet weit über dem Bildschirm */
-            to { transform: translateY(100dvh) rotate(var(--end-rot)); } /* Fällt komplett durch den Bildschirm hindurch */
+            from {
+                /* Startet weit über dem Bildschirm und mit einer zufälligen Rotation */
+                transform: translateY(-150px) rotate(var(--start-rot));
+                opacity: 0;
+            }
+            10% {
+                /* Wird schnell sichtbar */
+                opacity: 1;
+            }
+            to {
+                /* Fällt komplett durch den Bildschirm hindurch und rotiert dabei weiter */
+                transform: translateY(105dvh) rotate(var(--end-rot));
+                opacity: 1;
+            }
         }
         #game-over-content {
-            display: none; /* Wird per JS auf 'flex' gesetzt */
+            display: none; /* Wird per JS auf 'flex' gesetzt, wenn die Animation läuft */
             flex-direction: column; align-items: center; justify-content: center;
             width: 100%; height: 100%; z-index: 10;
+            background-color: rgba(26, 26, 26, 0.7); /* Leichter Overlay, damit der Text besser lesbar ist */
+            animation: fadeInContent 1s ease-in forwards;
         }
-        /* --- ENDE NEU --- */
+        @keyframes fadeInContent {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        /* --- ENDE: VERBESSERTE Game-Over Screen Stile --- */
     </style>
 </head>
 <body>
@@ -162,7 +189,7 @@
     
     <div id="game-screen" class="screen"><div id="game-hud"><div id="game-stats"><span id="level-display">Level: 1</span><span id="hits-display">Treffer: 0 / 10</span></div><div id="target-word-display"></div><div id="game-actions"><button id="exit-game-btn" class="btn btn-secondary">Beenden</button><button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button></div></div><div id="game-area"></div></div>
 
-    <!-- --- NEU: Überarbeiteter Game-Over Screen --- -->
+    <!-- --- Überarbeiteter Game-Over Screen --- -->
     <div id="game-over-screen" class="screen">
         <div id="game-over-animation-container"></div>
         <div id="game-over-content" style="display: none; text-align: center;">
@@ -174,9 +201,11 @@
             </div>
         </div>
     </div>
-    <!-- --- ENDE NEU --- -->
 
     <script>
+    // Dein bisheriger JS-Code bleibt hier, bis zur endGame Funktion...
+    // ...
+    // ...
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(registration => {
@@ -221,7 +250,7 @@
             speedVariance: 20, targetWordFrequency: 30,
             readingGridSize: 'medium', 
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null,
-            levelWirdGewechselt: false // NEU: Der Schutzschalter
+            levelWirdGewechselt: false
         };
 
         let audioCtx = null;
@@ -341,7 +370,7 @@
         }
 
         function startLevel() {
-            state.levelWirdGewechselt = false; // NEU: Schutzschalter für neues Level zurücksetzen
+            state.levelWirdGewechselt = false;
 
             if (state.usedTargetWords.length >= state.wordList.length) {
                 endGame();
@@ -373,7 +402,7 @@
         function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord; } const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleWordCloudClick); el.addEventListener('touchstart', handleWordCloudClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
         
         function handleWordCloudClick(e) {
-            if (state.levelWirdGewechselt) return; // NEU: Wenn gesperrt, sofort abbrechen
+            if (state.levelWirdGewechselt) return;
 
             const el = e.target;
             if (el.dataset.clicked) return;
@@ -387,7 +416,7 @@
                 el.classList.add('correct');
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
-                    state.levelWirdGewechselt = true; // NEU: System SOFORT sperren
+                    state.levelWirdGewechselt = true;
                     playSound(completionSoundBuffer);
                     clearInterval(state.gameInterval);
                     setTimeout(() => {
@@ -407,7 +436,7 @@
         async function startReadingMode() { game.area.innerHTML = ''; updateHUD(); await new Promise(resolve => setTimeout(resolve, 0)); const config = GRID_CONFIGS[state.readingGridSize]; const TOTAL_WORDS = config.total; const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17))); state.hitsNeeded = TARGET_COUNT; const distractors = state.wordList.filter(w => w !== state.targetWord); let wordsForPage = []; for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord); } for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord); } shuffleArray(wordsForPage); const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, ""); const cellPadding = 10; const cellWidth = (game.area.clientWidth / config.cols) - cellPadding; const cellHeight = (game.area.clientHeight / config.rows) - cellPadding; const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight); const pageContainer = document.createElement('div'); pageContainer.id = 'reading-page-container'; pageContainer.style.setProperty('--grid-rows', config.rows); pageContainer.style.setProperty('--grid-cols', config.cols); wordsForPage.forEach(word => { const wordSpan = document.createElement('span'); wordSpan.textContent = word; wordSpan.classList.add('reading-word'); wordSpan.addEventListener('click', handleReadingWordClick); wordSpan.style.fontSize = `${optimalFontSize}px`; pageContainer.appendChild(wordSpan); }); game.area.appendChild(pageContainer); updateHUD(); }
         
         function handleReadingWordClick(e) {
-            if (state.levelWirdGewechselt) return; // NEU: Wenn gesperrt, sofort abbrechen
+            if (state.levelWirdGewechselt) return;
 
             const el = e.target;
             if (el.classList.contains('correct')) return;
@@ -418,7 +447,7 @@
                 state.hits++;
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
-                    state.levelWirdGewechselt = true; // NEU: System SOFORT sperren
+                    state.levelWirdGewechselt = true;
                     playSound(completionSoundBuffer);
                     setTimeout(() => {
                         state.level++;
@@ -431,7 +460,6 @@
             }
         }
 
-        // --- Hilfsfunktionen bleiben unverändert ---
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
         function calculateOptimalFontSize(text, maxWidth, maxHeight) { const meter = document.createElement('span'); meter.classList.add('reading-word'); meter.style.position = 'absolute'; meter.style.visibility = 'hidden'; meter.style.whiteSpace = 'nowrap'; meter.textContent = text; document.body.appendChild(meter); let fontSize = 100; meter.style.fontSize = `${fontSize}px`; while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) { fontSize--; meter.style.fontSize = `${fontSize}px`; } document.body.removeChild(meter); return Math.max(fontSize * 0.9, 8); }
         async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
@@ -441,6 +469,7 @@
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
         function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; }
         
+        // --- START: VERBESSERTE endGame Funktion ---
         function endGame() {
             clearInterval(state.gameInterval);
             showScreen('gameOver');
@@ -449,27 +478,34 @@
             const container = document.getElementById('game-over-animation-container');
             const finalContent = document.getElementById('game-over-content');
             
+            // Container leeren und Inhalt verstecken für einen sauberen Start
             container.innerHTML = '';
             finalContent.style.display = 'none';
 
-            const wordsToAnimate = state.wordList.length > 70 ? shuffleArray([...state.wordList]).slice(0, 70) : state.wordList;
+            // Um eine Überlastung bei sehr langen Listen zu vermeiden, begrenzen wir die Anzahl der animierten Wörter.
+            // Wir mischen sie, damit es jedes Mal etwas anders aussieht.
+            const wordsToAnimate = state.wordList.length > 70 
+                ? shuffleArray([...state.wordList]).slice(0, 70) 
+                : state.wordList;
 
             wordsToAnimate.forEach(word => {
                 const el = document.createElement('span');
                 el.textContent = word;
                 el.classList.add('rain-word');
 
-                const delay = Math.random() * 1.5;
-                const duration = 2.5;
+                // Generiere zufällige Werte für eine dynamische Animation
+                const delay = Math.random() * 2.5;      // Startverzögerung (bis zu 2.5s)
+                const duration = 3 + Math.random() * 2; // Dauer des Falls (3s bis 5s)
+                const startX = Math.random() * 95;      // Startposition X (in vw, 95 statt 100 um Scrollbalken zu vermeiden)
+                const fontSize = 1 + Math.random() * 2; // Schriftgröße (1em bis 3em)
+                const startRotation = -25 + Math.random() * 50; // Start-Rotation (-25deg bis +25deg)
+                const endRotation = startRotation + (-40 + Math.random() * 80); // End-Rotation
 
-                const startX = Math.random() * 95;
-                const fontSize = 1 + Math.random() * 2;
-                const startRotation = -20 + Math.random() * 40;
-                const endRotation = -20 + Math.random() * 40;
-
+                // Setze die CSS-Variablen, die von der @keyframes-Regel gelesen werden
                 el.style.setProperty('--start-rot', `${startRotation}deg`);
                 el.style.setProperty('--end-rot', `${endRotation}deg`);
                 
+                // Wende die anderen zufälligen Stile an
                 el.style.left = `${startX}vw`;
                 el.style.fontSize = `${fontSize}em`;
                 el.style.animationDelay = `${delay}s`;
@@ -477,16 +513,20 @@
                 
                 container.appendChild(el);
 
+                // Entferne das Element, nachdem die Animation sicher abgeschlossen ist, um den DOM sauber zu halten
                 setTimeout(() => {
                     el.remove();
-                }, (delay + duration) * 1000 + 100);
+                }, (delay + duration) * 1000 + 200);
             });
 
+            // Zeige den finalen Inhalt erst an, nachdem die Animation begonnen hat
             setTimeout(() => {
                 finalContent.style.display = 'flex';
-                finalContent.style.flexDirection = 'column';
-            }, 3500);
+                // Die CSS-Animation "fadeInContent" startet automatisch
+            }, 3000); // 3 Sekunden warten, damit der Regen-Effekt gut sichtbar ist
         }
+        // --- ENDE: VERBESSERTE endGame Funktion ---
+
 
         initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
     });
