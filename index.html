@@ -73,7 +73,14 @@
             overflow: hidden; display: grid; grid-template-rows: repeat(var(--grid-rows, 7), 1fr); grid-template-columns: repeat(var(--grid-cols, 10), 1fr); gap: 5px;
         }
         .reading-word {
-            display: grid; place-items: center; cursor: pointer; border-radius: 4px; transition: background-color 0.2s, color 0.2s; user-select: none; line-height: 1;
+            display: flex;
+            justify-content: center; /* Zentriert horizontal */
+            align-items: center;     /* Zentriert vertikal */
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s, color 0.2s;
+            user-select: none;
+            line-height: 1;
         }
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
