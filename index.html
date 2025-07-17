@@ -84,8 +84,29 @@
         .incorrect { background-color: var(--error-color) !important; color: white !important; }
         .shake { animation: shake-anim 0.5s; } @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
         
-        /* Game-Over Screen */
-        #game-over-screen h1 { font-size: 3em; }
+        /* --- NEU: Game-Over Screen Stile --- */
+        #game-over-screen {
+            justify-content: flex-start; /* Container für Animation oben ausrichten */
+            overflow: hidden; /* Verhindert Scrollbalken durch Off-Screen-Elemente */
+        }
+        #game-over-animation-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;
+        }
+        .rain-word {
+            position: absolute; color: var(--primary-color); font-weight: bold; white-space: nowrap;
+            will-change: transform; /* Performance-Tipp: Sagt dem Browser, was sich ändern wird */
+            animation-name: word-rain-fall; animation-timing-function: linear; animation-fill-mode: forwards; /* Bleibt am Endpunkt der Animation */
+        }
+        @keyframes word-rain-fall {
+            from { transform: translateY(-150px) rotate(var(--start-rot)); } /* Startet weit über dem Bildschirm */
+            to { transform: translateY(100dvh) rotate(var(--end-rot)); } /* Fällt komplett durch den Bildschirm hindurch */
+        }
+        #game-over-content {
+            display: none; /* Wird per JS auf 'flex' gesetzt */
+            flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; height: 100%; z-index: 10;
+        }
+        /* --- ENDE NEU --- */
     </style>
 </head>
 <body>
@@ -100,16 +121,12 @@
             <div class="settings-box">
                 <h2>Einstellungen</h2>
                 <div class="settings-group"> <label>Spielmodus</label> <div class="btn-group"> <button id="mode-wordcloud" class="active">Wortwolke</button> <button id="mode-reading">Lesemodus</button> </div> </div>
-                
-                <!-- NEU: Sound-Schalter -->
                 <div class="settings-group">
                     <label>Ton</label>
                     <div class="btn-group">
                         <button id="sound-toggle-btn" class="active">An</button>
                     </div>
                 </div>
-                <!-- ENDE NEU -->
-
                 <div id="conditional-settings"> <div id="wordcloud-settings" class="setting-block active">
                     <div class="settings-group">
                         <label for="target-frequency-slider">Zielwort-Häufigkeit</label>
@@ -137,7 +154,20 @@
     </div>
     
     <div id="game-screen" class="screen"><div id="game-hud"><div id="game-stats"><span id="level-display">Level: 1</span><span id="hits-display">Treffer: 0 / 10</span></div><div id="target-word-display"></div><div id="game-actions"><button id="exit-game-btn" class="btn btn-secondary">Beenden</button><button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button></div></div><div id="game-area"></div></div>
-    <div id="game-over-screen" class="screen"><h1>Spiel vorbei!</h1><p>Du hast alle Wörter gemeistert.</p><button id="restart-btn" class="btn btn-primary" style="margin-top: 20px;">Neues Spiel</button></div>
+
+    <!-- --- NEU: Überarbeiteter Game-Over Screen --- -->
+    <div id="game-over-screen" class="screen">
+        <div id="game-over-animation-container"></div>
+        <div id="game-over-content" style="display: none; text-align: center;">
+            <h1>Toll gemacht!</h1>
+            <p>Du hast alle Wörter gemeistert.</p>
+            <div class="action-buttons" style="justify-content: center;">
+                <button id="repeat-game-btn" class="btn btn-primary">Wiederholen</button>
+                <button id="new-selection-btn" class="btn btn-secondary">Neue Auswahl</button>
+            </div>
+        </div>
+    </div>
+    <!-- --- ENDE NEU --- -->
 
     <script>
     if ('serviceWorker' in navigator) {
@@ -174,10 +204,10 @@
             gridSmallBtn: document.getElementById('grid-small'),
             gridMediumBtn: document.getElementById('grid-medium'),
             gridLargeBtn: document.getElementById('grid-large'),
-            soundToggleBtn: document.getElementById('sound-toggle-btn'), // NEU
+            soundToggleBtn: document.getElementById('sound-toggle-btn'),
         };
         const game = { levelDisplay: document.getElementById('level-display'), hitsDisplay: document.getElementById('hits-display'), targetWordDisplay: document.getElementById('target-word-display'), area: document.getElementById('game-area'), exitBtn: document.getElementById('exit-game-btn') };
-        const gameOver = { restartBtn: document.getElementById('restart-btn') };
+        
         const fullscreenBtns = [document.getElementById('fullscreen-btn'), document.getElementById('fullscreen-btn-game')];
         let state = {
             gameMode: 'wordcloud', numLanes: 7, laneStates: [], baseAnimationSpeed: 10000,
@@ -186,50 +216,44 @@
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
 
-        // --- NEU: Sound-Variablen ---
         let audioCtx = null;
         let clickSoundBuffer = null;
         let completionSoundBuffer = null;
+        let fanfareSoundBuffer = null; // NEU
         let soundsEnabled = true;
-        // --- ENDE NEU ---
-
-        function updateSetupUI() {
-            setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
-            setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
-            setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud');
-            setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading');
-            setup.baseSpeedSlider.value = state.baseAnimationSpeed;
-            setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's';
-            setup.speedVarianceSlider.value = state.speedVariance;
-            setup.speedVarianceValue.textContent = `±${state.speedVariance}%`;
-            setup.targetFrequencySlider.value = state.targetWordFrequency;
-            setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`;
-            
-            setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small');
-            setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium');
-            setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large');
-            
-            // NEU: Sound-Button UI aktualisieren
-            setup.soundToggleBtn.classList.toggle('active', soundsEnabled);
-            setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus';
+        
+        // --- NEU: Funktion zum Laden von Audiodateien ---
+        async function loadAudioBuffer(url) {
+            if (!audioCtx) return null;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP-Fehler ${response.status} für ${url}`);
+                const arrayBuffer = await response.arrayBuffer();
+                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                return audioBuffer;
+            } catch (e) {
+                console.error(`Fehler beim Laden der Audiodatei: ${url}`, e);
+                setup.errorMessage.textContent = `Sounddatei ${url} konnte nicht geladen werden.`;
+                setup.errorMessage.style.display = 'block';
+                return null;
+            }
         }
 
-        // --- NEU: Kompletter Sound-Bereich ---
-        function initAudio() {
-            if (audioCtx) return; // Nur einmal initialisieren
+        async function initAudio() {
+            if (audioCtx) return;
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                createSounds();
+                await createSounds(); // Warten bis Sounds erstellt sind
             } catch (e) {
                 console.error("Web Audio API wird von diesem Browser nicht unterstützt.", e);
                 soundsEnabled = false; 
-                setup.soundToggleBtn.style.display = 'none'; // Button verstecken, wenn API fehlt
+                setup.soundToggleBtn.style.display = 'none';
             }
         }
         
-        function createSounds() {
+        async function createSounds() {
             if (!audioCtx) return;
-            // Klick-Sound (kurzer, hoher Ton)
+            // Klick-Sound
             let clickDuration = 0.05;
             clickSoundBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * clickDuration, audioCtx.sampleRate);
             const clickData = clickSoundBuffer.getChannelData(0);
@@ -237,21 +261,19 @@
                 clickData[i] = Math.sin(2 * Math.PI * 880 * (i / audioCtx.sampleRate)) * Math.exp(-i / (audioCtx.sampleRate * 0.01));
             }
 
-            // Abgeschlossen-Sound (zwei Töne nacheinander)
+            // Abgeschlossen-Sound
             let completionDuration = 0.4;
             completionSoundBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * completionDuration, audioCtx.sampleRate);
             const completionData = completionSoundBuffer.getChannelData(0);
-            const tone1Duration = 0.15;
-            const tone2Start = 0.2;
+            const tone1Duration = 0.15; const tone2Start = 0.2;
             for (let i = 0; i < completionData.length; i++) {
                 const time = i / audioCtx.sampleRate;
-                if (time < tone1Duration) { // Ton 1
-                    completionData[i] = Math.sin(2 * Math.PI * 523.25 * time) * Math.exp(-time * 10);
-                } else if (time >= tone2Start && time < completionDuration) { // Ton 2
-                    const time2 = time - tone2Start;
-                    completionData[i] = Math.sin(2 * Math.PI * 783.99 * time2) * Math.exp(-time2 * 10);
-                }
+                if (time < tone1Duration) { completionData[i] = Math.sin(2 * Math.PI * 523.25 * time) * Math.exp(-time * 10); } 
+                else if (time >= tone2Start && time < completionDuration) { const time2 = time - tone2Start; completionData[i] = Math.sin(2 * Math.PI * 783.99 * time2) * Math.exp(-time2 * 10); }
             }
+            
+            // NEU: Fanfare laden (erfordert eine fanfare.mp3 Datei im selben Ordner)
+            fanfareSoundBuffer = await loadAudioBuffer('fanfare.mp3');
         }
 
         function playSound(buffer) {
@@ -267,8 +289,7 @@
             soundsEnabled = !soundsEnabled;
             updateSetupUI();
         }
-        // --- ENDE NEU ---
-
+        
         async function initializeApp() {
             await loadWordData();
             populateTopicSelector();
@@ -281,21 +302,24 @@
             setup.baseSpeedSlider.addEventListener('input', (e) => { state.baseAnimationSpeed = parseInt(e.target.value); updateSetupUI(); });
             setup.speedVarianceSlider.addEventListener('input', (e) => { state.speedVariance = parseInt(e.target.value); updateSetupUI(); });
             setup.targetFrequencySlider.addEventListener('input', (e) => { state.targetWordFrequency = parseInt(e.target.value); updateSetupUI(); });
-
             setup.gridSmallBtn.addEventListener('click', () => { state.readingGridSize = 'small'; updateSetupUI(); });
             setup.gridMediumBtn.addEventListener('click', () => { state.readingGridSize = 'medium'; updateSetupUI(); });
             setup.gridLargeBtn.addEventListener('click', () => { state.readingGridSize = 'large'; updateSetupUI(); });
-
+            
             setup.startGameBtn.addEventListener('click', startGame);
             game.exitBtn.addEventListener('click', () => { clearInterval(state.gameInterval); showScreen('setup'); });
-            gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
+            setup.soundToggleBtn.addEventListener('click', toggleSounds);
 
-            setup.soundToggleBtn.addEventListener('click', toggleSounds); // NEU
+            // --- NEU: Event Listeners für die neuen Buttons ---
+            const repeatGameBtn = document.getElementById('repeat-game-btn');
+            const newSelectionBtn = document.getElementById('new-selection-btn');
+            repeatGameBtn.addEventListener('click', startGame); 
+            newSelectionBtn.addEventListener('click', () => showScreen('setup'));
         }
         
-        function startGame() {
-            initAudio(); // NEU: Audio-Kontext beim ersten Nutzer-Klick initialisieren
+        async function startGame() {
+            await initAudio(); 
             const selectedTopic = setup.topicSelector.value;
             const selectedList = setup.listSelector.value;
             const wordList = WORD_DATA[selectedTopic][selectedList];
@@ -305,7 +329,7 @@
                 return;
             }
             setup.errorMessage.style.display = 'none';
-            state.wordList = wordList;
+            state.wordList = [...new Set(wordList)]; // Sicherstellen, dass Wörter unique sind
             state.level = 1;
             state.hits = 0;
             state.usedTargetWords = [];
@@ -322,10 +346,8 @@
             state.targetWord = availableWords[Math.floor(Math.random() * availableWords.length)];
             state.usedTargetWords.push(state.targetWord);
             state.hits = 0;
-            
             game.area.innerHTML = '';
             clearInterval(state.gameInterval);
-
             game.area.classList.remove('reading-mode-active');
             if (state.gameMode === 'reading') {
                 game.area.classList.add('reading-mode-active');
@@ -342,149 +364,74 @@
             game.targetWordDisplay.style.visibility = 'visible';
         }
 
-        function startWordCloudMode() {
-            state.laneStates = Array(state.numLanes).fill(0);
-            state.hitsNeeded = 10;
-            updateHUD();
-            state.gameInterval = setInterval(spawnWordRain, 350);
-        }
+        // --- Die restlichen Funktionen (startWordCloudMode, spawnWordRain, handleWordCloudClick, startReadingMode, etc.) bleiben unverändert ---
+        function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
+        function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord; } const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleWordCloudClick); el.addEventListener('touchstart', handleWordCloudClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
+        function handleWordCloudClick(e) { const el = e.target; if (el.dataset.clicked) return; el.dataset.clicked = 'true'; el.style.transform = getComputedStyle(el).transform; el.style.animation = 'none'; el.style.pointerEvents = 'none'; if (el.textContent === state.targetWord) { playSound(clickSoundBuffer); state.hits++; el.classList.add('correct'); updateHUD(); if (state.hits >= state.hitsNeeded) { playSound(completionSoundBuffer); clearInterval(state.gameInterval); setTimeout(() => { state.level++; startLevel(); }, 1000); } } else { el.classList.add('incorrect', 'shake'); } setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500); }
+        async function startReadingMode() { game.area.innerHTML = ''; updateHUD(); await new Promise(resolve => setTimeout(resolve, 0)); const config = GRID_CONFIGS[state.readingGridSize]; const TOTAL_WORDS = config.total; const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17))); state.hitsNeeded = TARGET_COUNT; const distractors = state.wordList.filter(w => w !== state.targetWord); let wordsForPage = []; for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord); } for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord); } shuffleArray(wordsForPage); const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, ""); const gameAreaRect = game.area.getBoundingClientRect(); const cellPadding = 10; const cellWidth = (gameAreaRect.width / config.cols) - cellPadding; const cellHeight = (gameAreaRect.height / config.rows) - cellPadding; const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight); const pageContainer = document.createElement('div'); pageContainer.id = 'reading-page-container'; pageContainer.style.setProperty('--grid-rows', config.rows); pageContainer.style.setProperty('--grid-cols', config.cols); wordsForPage.forEach(word => { const wordSpan = document.createElement('span'); wordSpan.textContent = word; wordSpan.classList.add('reading-word'); wordSpan.addEventListener('click', handleReadingWordClick); wordSpan.style.fontSize = `${optimalFontSize}px`; pageContainer.appendChild(wordSpan); }); game.area.appendChild(pageContainer); updateHUD(); }
+        function handleReadingWordClick(e) { const el = e.target; if (el.classList.contains('correct')) return; if (el.textContent === state.targetWord) { playSound(clickSoundBuffer); el.classList.add('correct'); el.classList.remove('incorrect', 'shake'); state.hits++; updateHUD(); if (state.hits >= state.hitsNeeded) { playSound(completionSoundBuffer); setTimeout(() => { state.level++; startLevel(); }, 1200); } } else { el.classList.add('incorrect', 'shake'); setTimeout(() => el.classList.remove('incorrect', 'shake'), 500); } }
 
-        function spawnWordRain() {
-            if (document.hidden) return;
-            const now = Date.now();
-            const freeLanes = [];
-            for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); }
-            if (freeLanes.length === 0) return;
-
-            let wordToSpawn;
-            const probabilityThreshold = state.targetWordFrequency / 100;
-            if (Math.random() < probabilityThreshold) {
-                wordToSpawn = state.targetWord;
-            } else {
-                const distractors = state.wordList.filter(w => w !== state.targetWord);
-                wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;
-            }
-
-            const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)];
-            const el = document.createElement('div');
-            el.textContent = wordToSpawn;
-            el.classList.add('game-word', 'word-fly-in');
-            
-            const areaRect = game.area.getBoundingClientRect();
-            const laneHeight = areaRect.height / state.numLanes;
-            el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`;
-            
-            const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100);
-            const randomDeviation = (Math.random() * 2 - 1) * varianceAmount;
-            const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation);
-            
-            el.style.animationDuration = `${finalAnimationDuration}ms`;
-            el.addEventListener('pointerdown', handleWordCloudClick);
-            el.addEventListener('touchstart', handleWordCloudClick, { passive: true });
-            
-            game.area.appendChild(el);
-            
-            const wordWidth = el.offsetWidth;
-            const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000);
-            const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
-            state.laneStates[laneIndex] = now + clearanceTime * 1000;
-            
-            setTimeout(() => el.remove(), finalAnimationDuration);
-        }
-
-        function handleWordCloudClick(e) {
-            const el = e.target;
-            if (el.dataset.clicked) return;
-            el.dataset.clicked = 'true';
-            
-            el.style.transform = getComputedStyle(el).transform;
-            el.style.animation = 'none';
-            el.style.pointerEvents = 'none';
-
-            if (el.textContent === state.targetWord) {
-                playSound(clickSoundBuffer); // NEU: Sound abspielen
-                state.hits++;
-                el.classList.add('correct');
-                updateHUD();
-                if (state.hits >= state.hitsNeeded) {
-                    playSound(completionSoundBuffer); // NEU: Sound abspielen
-                    clearInterval(state.gameInterval);
-                    setTimeout(() => {
-                        state.level++;
-                        startLevel();
-                    }, 1000);
-                }
-            } else {
-                el.classList.add('incorrect', 'shake');
-            }
-            setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
-        }
-        
-        async function startReadingMode() {
-            game.area.innerHTML = ''; 
-            updateHUD(); 
-            await new Promise(resolve => setTimeout(resolve, 0)); 
-            const config = GRID_CONFIGS[state.readingGridSize];
-            const TOTAL_WORDS = config.total;
-            const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17)));
-            state.hitsNeeded = TARGET_COUNT;
-            const distractors = state.wordList.filter(w => w !== state.targetWord);
-            let wordsForPage = [];
-            for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord); }
-            for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord); }
-            shuffleArray(wordsForPage);
-            const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, "");
-            const gameAreaRect = game.area.getBoundingClientRect();
-            const cellPadding = 10;
-            const cellWidth = (gameAreaRect.width / config.cols) - cellPadding;
-            const cellHeight = (gameAreaRect.height / config.rows) - cellPadding;
-            const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight);
-            const pageContainer = document.createElement('div');
-            pageContainer.id = 'reading-page-container';
-            pageContainer.style.setProperty('--grid-rows', config.rows);
-            pageContainer.style.setProperty('--grid-cols', config.cols);
-            wordsForPage.forEach(word => {
-                const wordSpan = document.createElement('span');
-                wordSpan.textContent = word;
-                wordSpan.classList.add('reading-word');
-                wordSpan.addEventListener('click', handleReadingWordClick);
-                wordSpan.style.fontSize = `${optimalFontSize}px`;
-                pageContainer.appendChild(wordSpan);
-            });
-            game.area.appendChild(pageContainer);
-            updateHUD();
-        }
-
-        function handleReadingWordClick(e) {
-            const el = e.target;
-            if (el.classList.contains('correct')) return;
-            if (el.textContent === state.targetWord) {
-                playSound(clickSoundBuffer); // NEU: Sound abspielen
-                el.classList.add('correct');
-                el.classList.remove('incorrect', 'shake');
-                state.hits++;
-                updateHUD();
-                if (state.hits >= state.hitsNeeded) {
-                    playSound(completionSoundBuffer); // NEU: Sound abspielen
-                    setTimeout(() => {
-                        state.level++;
-                        startLevel();
-                    }, 1200);
-                }
-            } else {
-                el.classList.add('incorrect', 'shake');
-                setTimeout(() => el.classList.remove('incorrect', 'shake'), 500);
-            }
-        }
-        
-        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+        // --- Hilfsfunktionen bleiben unverändert ---
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
         function calculateOptimalFontSize(text, maxWidth, maxHeight) { const meter = document.createElement('span'); meter.style.position = 'absolute'; meter.style.visibility = 'hidden'; meter.style.whiteSpace = 'nowrap'; meter.textContent = text; document.body.appendChild(meter); let fontSize = 100; meter.style.fontSize = `${fontSize}px`; while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) { fontSize--; meter.style.fontSize = `${fontSize}px`; } document.body.removeChild(meter); return Math.max(fontSize, 8); }
         async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
-        function populateTopicSelector() { Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
-        function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
+        function populateTopicSelector() { setup.topicSelector.innerHTML = ''; Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
+        function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; if(!WORD_DATA[selectedTopic]) return; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
         function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
-        function endGame() { clearInterval(state.gameInterval); showScreen('gameOver'); }
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
+        function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; }
+        
+        // --- NEU: Überarbeitete endGame Funktion ---
+        function endGame() {
+            clearInterval(state.gameInterval);
+            showScreen('gameOver');
+            playSound(fanfareSoundBuffer);
+
+            const container = document.getElementById('game-over-animation-container');
+            const finalContent = document.getElementById('game-over-content');
+            
+            container.innerHTML = '';
+            finalContent.style.display = 'none';
+
+            // Performance: Limitiert die Anzahl der Wörter bei sehr langen Listen
+            const wordsToAnimate = state.wordList.length > 70 ? shuffleArray([...state.wordList]).slice(0, 70) : state.wordList;
+
+            wordsToAnimate.forEach(word => {
+                const el = document.createElement('span');
+                el.textContent = word;
+                el.classList.add('rain-word');
+
+                // Timing für 4s-Grenze: gestaffelter Start über 1.5s, Falldauer 2.5s -> max. 4s
+                const delay = Math.random() * 1.5;   // Startverzögerung 0-1.5s
+                const duration = 2.5;                // Falldauer 2.5s
+
+                const startX = Math.random() * 95;
+                const fontSize = 1 + Math.random() * 2;
+                const startRotation = -20 + Math.random() * 40;
+                const endRotation = -20 + Math.random() * 40;
+
+                el.style.setProperty('--start-rot', `${startRotation}deg`);
+                el.style.setProperty('--end-rot', `${endRotation}deg`);
+                
+                el.style.left = `${startX}vw`;
+                el.style.fontSize = `${fontSize}em`;
+                el.style.animationDelay = `${delay}s`;
+                el.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(el);
+
+                // Element nach Animation aus DOM entfernen
+                setTimeout(() => {
+                    el.remove();
+                }, (delay + duration) * 1000 + 100);
+            });
+
+            // Buttons etc. einblenden, wenn die Animation fast vorbei ist
+            setTimeout(() => {
+                finalContent.style.display = 'flex';
+                finalContent.style.flexDirection = 'column';
+            }, 3500); // Erscheint kurz bevor das letzte Wort den Bildschirm verlässt
+        }
 
         initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
     });
