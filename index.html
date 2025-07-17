@@ -336,7 +336,7 @@
         }
         
         function updateHUD() {
-            game.levelDisplay.textContent = `Level: ${state.level}`;
+            game.levelDisplay.textContent = `Level: ${state.level} von ${state.wordList.length}`;
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
             game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`;
             game.targetWordDisplay.style.visibility = 'visible';
