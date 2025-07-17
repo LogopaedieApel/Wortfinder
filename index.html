@@ -213,16 +213,16 @@
             gameMode: 'wordcloud', numLanes: 7, laneStates: [], baseAnimationSpeed: 10000,
             speedVariance: 20, targetWordFrequency: 30,
             readingGridSize: 'medium', 
-            wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
+            wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null,
+            levelWirdGewechselt: false // NEU: Der Schutzschalter
         };
 
         let audioCtx = null;
         let clickSoundBuffer = null;
         let completionSoundBuffer = null;
-        let fanfareSoundBuffer = null; // NEU
+        let fanfareSoundBuffer = null;
         let soundsEnabled = true;
         
-        // --- NEU: Funktion zum Laden von Audiodateien ---
         async function loadAudioBuffer(url) {
             if (!audioCtx) return null;
             try {
@@ -243,7 +243,7 @@
             if (audioCtx) return;
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                await createSounds(); // Warten bis Sounds erstellt sind
+                await createSounds();
             } catch (e) {
                 console.error("Web Audio API wird von diesem Browser nicht unterstützt.", e);
                 soundsEnabled = false; 
@@ -253,7 +253,6 @@
         
         async function createSounds() {
             if (!audioCtx) return;
-            // Klick-Sound
             let clickDuration = 0.05;
             clickSoundBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * clickDuration, audioCtx.sampleRate);
             const clickData = clickSoundBuffer.getChannelData(0);
@@ -261,7 +260,6 @@
                 clickData[i] = Math.sin(2 * Math.PI * 880 * (i / audioCtx.sampleRate)) * Math.exp(-i / (audioCtx.sampleRate * 0.01));
             }
 
-            // Abgeschlossen-Sound
             let completionDuration = 0.4;
             completionSoundBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * completionDuration, audioCtx.sampleRate);
             const completionData = completionSoundBuffer.getChannelData(0);
@@ -272,7 +270,6 @@
                 else if (time >= tone2Start && time < completionDuration) { const time2 = time - tone2Start; completionData[i] = Math.sin(2 * Math.PI * 783.99 * time2) * Math.exp(-time2 * 10); }
             }
             
-            // NEU: Fanfare laden (erfordert eine fanfare.mp3 Datei im selben Ordner)
             fanfareSoundBuffer = await loadAudioBuffer('fanfare.mp3');
         }
 
@@ -311,7 +308,6 @@
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
             setup.soundToggleBtn.addEventListener('click', toggleSounds);
 
-            // --- NEU: Event Listeners für die neuen Buttons ---
             const repeatGameBtn = document.getElementById('repeat-game-btn');
             const newSelectionBtn = document.getElementById('new-selection-btn');
             repeatGameBtn.addEventListener('click', startGame); 
@@ -329,7 +325,7 @@
                 return;
             }
             setup.errorMessage.style.display = 'none';
-            state.wordList = [...new Set(wordList)]; // Sicherstellen, dass Wörter unique sind
+            state.wordList = [...new Set(wordList)];
             state.level = 1;
             state.hits = 0;
             state.usedTargetWords = [];
@@ -338,6 +334,8 @@
         }
 
         function startLevel() {
+            state.levelWirdGewechselt = false; // NEU: Schutzschalter für neues Level zurücksetzen
+
             if (state.usedTargetWords.length >= state.wordList.length) {
                 endGame();
                 return;
@@ -364,12 +362,67 @@
             game.targetWordDisplay.style.visibility = 'visible';
         }
 
-        // --- Die restlichen Funktionen (startWordCloudMode, spawnWordRain, handleWordCloudClick, startReadingMode, etc.) bleiben unverändert ---
         function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
         function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord; } const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleWordCloudClick); el.addEventListener('touchstart', handleWordCloudClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
-        function handleWordCloudClick(e) { const el = e.target; if (el.dataset.clicked) return; el.dataset.clicked = 'true'; el.style.transform = getComputedStyle(el).transform; el.style.animation = 'none'; el.style.pointerEvents = 'none'; if (el.textContent === state.targetWord) { playSound(clickSoundBuffer); state.hits++; el.classList.add('correct'); updateHUD(); if (state.hits >= state.hitsNeeded) { playSound(completionSoundBuffer); clearInterval(state.gameInterval); setTimeout(() => { state.level++; startLevel(); }, 1000); } } else { el.classList.add('incorrect', 'shake'); } setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500); }
+        
+        function handleWordCloudClick(e) {
+            if (state.levelWirdGewechselt) return; // NEU: Wenn gesperrt, sofort abbrechen
+
+            const el = e.target;
+            if (el.dataset.clicked) return;
+            el.dataset.clicked = 'true';
+            el.style.transform = getComputedStyle(el).transform;
+            el.style.animation = 'none';
+            el.style.pointerEvents = 'none';
+            if (el.textContent === state.targetWord) {
+                playSound(clickSoundBuffer);
+                state.hits++;
+                el.classList.add('correct');
+                updateHUD();
+                if (state.hits >= state.hitsNeeded) {
+                    state.levelWirdGewechselt = true; // NEU: System SOFORT sperren
+                    playSound(completionSoundBuffer);
+                    clearInterval(state.gameInterval);
+                    setTimeout(() => {
+                        state.level++;
+                        startLevel();
+                    }, 1000);
+                }
+            } else {
+                el.classList.add('incorrect', 'shake');
+            }
+            setTimeout(() => {
+                el.classList.add('fade-out');
+                setTimeout(() => el.remove(), 300);
+            }, 500);
+        }
+
         async function startReadingMode() { game.area.innerHTML = ''; updateHUD(); await new Promise(resolve => setTimeout(resolve, 0)); const config = GRID_CONFIGS[state.readingGridSize]; const TOTAL_WORDS = config.total; const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17))); state.hitsNeeded = TARGET_COUNT; const distractors = state.wordList.filter(w => w !== state.targetWord); let wordsForPage = []; for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord); } for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord); } shuffleArray(wordsForPage); const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, ""); const gameAreaRect = game.area.getBoundingClientRect(); const cellPadding = 10; const cellWidth = (gameAreaRect.width / config.cols) - cellPadding; const cellHeight = (gameAreaRect.height / config.rows) - cellPadding; const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight); const pageContainer = document.createElement('div'); pageContainer.id = 'reading-page-container'; pageContainer.style.setProperty('--grid-rows', config.rows); pageContainer.style.setProperty('--grid-cols', config.cols); wordsForPage.forEach(word => { const wordSpan = document.createElement('span'); wordSpan.textContent = word; wordSpan.classList.add('reading-word'); wordSpan.addEventListener('click', handleReadingWordClick); wordSpan.style.fontSize = `${optimalFontSize}px`; pageContainer.appendChild(wordSpan); }); game.area.appendChild(pageContainer); updateHUD(); }
-        function handleReadingWordClick(e) { const el = e.target; if (el.classList.contains('correct')) return; if (el.textContent === state.targetWord) { playSound(clickSoundBuffer); el.classList.add('correct'); el.classList.remove('incorrect', 'shake'); state.hits++; updateHUD(); if (state.hits >= state.hitsNeeded) { playSound(completionSoundBuffer); setTimeout(() => { state.level++; startLevel(); }, 1200); } } else { el.classList.add('incorrect', 'shake'); setTimeout(() => el.classList.remove('incorrect', 'shake'), 500); } }
+        
+        function handleReadingWordClick(e) {
+            if (state.levelWirdGewechselt) return; // NEU: Wenn gesperrt, sofort abbrechen
+
+            const el = e.target;
+            if (el.classList.contains('correct')) return;
+            if (el.textContent === state.targetWord) {
+                playSound(clickSoundBuffer);
+                el.classList.add('correct');
+                el.classList.remove('incorrect', 'shake');
+                state.hits++;
+                updateHUD();
+                if (state.hits >= state.hitsNeeded) {
+                    state.levelWirdGewechselt = true; // NEU: System SOFORT sperren
+                    playSound(completionSoundBuffer);
+                    setTimeout(() => {
+                        state.level++;
+                        startLevel();
+                    }, 1200);
+                }
+            } else {
+                el.classList.add('incorrect', 'shake');
+                setTimeout(() => el.classList.remove('incorrect', 'shake'), 500);
+            }
+        }
 
         // --- Hilfsfunktionen bleiben unverändert ---
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
@@ -381,7 +434,6 @@
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
         function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; }
         
-        // --- NEU: Überarbeitete endGame Funktion ---
         function endGame() {
             clearInterval(state.gameInterval);
             showScreen('gameOver');
@@ -393,7 +445,6 @@
             container.innerHTML = '';
             finalContent.style.display = 'none';
 
-            // Performance: Limitiert die Anzahl der Wörter bei sehr langen Listen
             const wordsToAnimate = state.wordList.length > 70 ? shuffleArray([...state.wordList]).slice(0, 70) : state.wordList;
 
             wordsToAnimate.forEach(word => {
@@ -401,9 +452,8 @@
                 el.textContent = word;
                 el.classList.add('rain-word');
 
-                // Timing für 4s-Grenze: gestaffelter Start über 1.5s, Falldauer 2.5s -> max. 4s
-                const delay = Math.random() * 1.5;   // Startverzögerung 0-1.5s
-                const duration = 2.5;                // Falldauer 2.5s
+                const delay = Math.random() * 1.5;
+                const duration = 2.5;
 
                 const startX = Math.random() * 95;
                 const fontSize = 1 + Math.random() * 2;
@@ -420,17 +470,15 @@
                 
                 container.appendChild(el);
 
-                // Element nach Animation aus DOM entfernen
                 setTimeout(() => {
                     el.remove();
                 }, (delay + duration) * 1000 + 100);
             });
 
-            // Buttons etc. einblenden, wenn die Animation fast vorbei ist
             setTimeout(() => {
                 finalContent.style.display = 'flex';
                 finalContent.style.flexDirection = 'column';
-            }, 3500); // Erscheint kurz bevor das letzte Wort den Bildschirm verlässt
+            }, 3500);
         }
 
         initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
