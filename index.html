@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
 
-    <!-- NEU: PWA / "Zum Home-Bildschirm hinzufügen" Konfiguration -->
+    <!-- PWA / "Zum Home-Bildschirm hinzufügen" Konfiguration -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF8C00">
 
-    <!-- NEU: Speziell für Apple-Geräte (iOS/iPadOS) -->
+    <!-- Speziell für Apple-Geräte (iOS/iPadOS) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Wortfinder">
-    <link rel="apple-touch-icon" href="icon-192x192.png"> <!-- Wichtig: Icon-Datei muss existieren -->
+    <link rel="apple-touch-icon" href="icon-192x192.png">
 
     <style>
         /* CSS-Variablen und grundlegende Stile */
@@ -23,7 +23,7 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--background-color); color: var(--text-color); overflow: hidden; }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; /* GEÄNDERT: dvh statt vh für mobile Browser */ width: 100vw; padding: 20px; }
+        .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; /* dvh statt vh für mobile Browser */ width: 100vw; padding: 20px; }
         .screen.active { display: flex; }
         h1 { color: var(--primary-color); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 25px; font-size: 2.5em; }
         
@@ -66,29 +66,14 @@
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 
-        /* Lesemodus Stile -- NEU GESTALTET */
+        /* Lesemodus Stile */
         #game-area.reading-mode-active { display: flex; justify-content: center; align-items: center; padding: 10px; overflow: hidden; }
         #reading-page-container {
-            width: 100%;
-            height: 100%;
-            background-color: var(--container-bg-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            display: grid;
-            grid-template-rows: repeat(var(--grid-rows, 7), 1fr);
-            grid-template-columns: repeat(var(--grid-cols, 10), 1fr);
-            gap: 5px;
+            width: 100%; height: 100%; background-color: var(--container-bg-color); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-radius: 10px;
+            overflow: hidden; display: grid; grid-template-rows: repeat(var(--grid-rows, 7), 1fr); grid-template-columns: repeat(var(--grid-cols, 10), 1fr); gap: 5px;
         }
         .reading-word {
-            display: grid;
-            place-items: center;
-            /* font-size wird nun dynamisch per JavaScript gesetzt, um Überlaufen zu verhindern */
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.2s, color 0.2s;
-            user-select: none;
-            line-height: 1;
+            display: grid; place-items: center; cursor: pointer; border-radius: 4px; transition: background-color 0.2s, color 0.2s; user-select: none; line-height: 1;
         }
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
@@ -112,27 +97,40 @@
                 <div> <label for="topic-selector">Thema</label> <select id="topic-selector"></select> </div>
                 <div> <label for="list-selector">Liste</label> <select id="list-selector"></select> </div>
             </div>
-            <div class="settings-box"> <h2>Einstellungen</h2> <div class="settings-group"> <label>Spielmodus</label> <div class="btn-group"> <button id="mode-wordcloud" class="active">Wortwolke</button> <button id="mode-reading">Lesemodus</button> </div> </div> <div id="conditional-settings"> <div id="wordcloud-settings" class="setting-block active">
+            <div class="settings-box">
+                <h2>Einstellungen</h2>
+                <div class="settings-group"> <label>Spielmodus</label> <div class="btn-group"> <button id="mode-wordcloud" class="active">Wortwolke</button> <button id="mode-reading">Lesemodus</button> </div> </div>
+                
+                <!-- NEU: Sound-Schalter -->
                 <div class="settings-group">
-                    <label for="target-frequency-slider">Zielwort-Häufigkeit</label>
-                    <div class="slider-container">
-                        <input type="range" id="target-frequency-slider" min="10" max="50" value="30" step="5">
-                        <span id="target-frequency-value" class="slider-value">30%</span>
-                    </div>
-                </div>
-                <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div>
-                <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div>
-            </div> <div id="reading-mode-settings" class="setting-block">
-                <!-- NEU: RASTERGRÖSSEN-AUSWAHL -->
-                <div class="settings-group">
-                    <label>Rastergröße (Dichte)</label>
+                    <label>Ton</label>
                     <div class="btn-group">
-                        <button id="grid-small">Klein (5x8)</button>
-                        <button id="grid-medium" class="active">Mittel (7x10)</button>
-                        <button id="grid-large">Groß (9x12)</button>
+                        <button id="sound-toggle-btn" class="active">An</button>
                     </div>
                 </div>
-            </div> </div> </div>
+                <!-- ENDE NEU -->
+
+                <div id="conditional-settings"> <div id="wordcloud-settings" class="setting-block active">
+                    <div class="settings-group">
+                        <label for="target-frequency-slider">Zielwort-Häufigkeit</label>
+                        <div class="slider-container">
+                            <input type="range" id="target-frequency-slider" min="10" max="50" value="30" step="5">
+                            <span id="target-frequency-value" class="slider-value">30%</span>
+                        </div>
+                    </div>
+                    <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div>
+                    <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div>
+                </div> <div id="reading-mode-settings" class="setting-block">
+                    <div class="settings-group">
+                        <label>Rastergröße (Dichte)</label>
+                        <div class="btn-group">
+                            <button id="grid-small">Klein (5x8)</button>
+                            <button id="grid-medium" class="active">Mittel (7x10)</button>
+                            <button id="grid-large">Groß (9x12)</button>
+                        </div>
+                    </div>
+                </div> </div>
+            </div>
             <div class="action-buttons"> <button id="start-game-btn" class="btn btn-primary">Spiel starten</button> <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button> </div>
             <p id="error-message"></p>
         </div>
@@ -176,6 +174,7 @@
             gridSmallBtn: document.getElementById('grid-small'),
             gridMediumBtn: document.getElementById('grid-medium'),
             gridLargeBtn: document.getElementById('grid-large'),
+            soundToggleBtn: document.getElementById('sound-toggle-btn'), // NEU
         };
         const game = { levelDisplay: document.getElementById('level-display'), hitsDisplay: document.getElementById('hits-display'), targetWordDisplay: document.getElementById('target-word-display'), area: document.getElementById('game-area'), exitBtn: document.getElementById('exit-game-btn') };
         const gameOver = { restartBtn: document.getElementById('restart-btn') };
@@ -186,6 +185,13 @@
             readingGridSize: 'medium', 
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null
         };
+
+        // --- NEU: Sound-Variablen ---
+        let audioCtx = null;
+        let clickSoundBuffer = null;
+        let completionSoundBuffer = null;
+        let soundsEnabled = true;
+        // --- ENDE NEU ---
 
         function updateSetupUI() {
             setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud');
@@ -202,7 +208,66 @@
             setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small');
             setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium');
             setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large');
+            
+            // NEU: Sound-Button UI aktualisieren
+            setup.soundToggleBtn.classList.toggle('active', soundsEnabled);
+            setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus';
         }
+
+        // --- NEU: Kompletter Sound-Bereich ---
+        function initAudio() {
+            if (audioCtx) return; // Nur einmal initialisieren
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                createSounds();
+            } catch (e) {
+                console.error("Web Audio API wird von diesem Browser nicht unterstützt.", e);
+                soundsEnabled = false; 
+                setup.soundToggleBtn.style.display = 'none'; // Button verstecken, wenn API fehlt
+            }
+        }
+        
+        function createSounds() {
+            if (!audioCtx) return;
+            // Klick-Sound (kurzer, hoher Ton)
+            let clickDuration = 0.05;
+            clickSoundBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * clickDuration, audioCtx.sampleRate);
+            const clickData = clickSoundBuffer.getChannelData(0);
+            for (let i = 0; i < clickData.length; i++) {
+                clickData[i] = Math.sin(2 * Math.PI * 880 * (i / audioCtx.sampleRate)) * Math.exp(-i / (audioCtx.sampleRate * 0.01));
+            }
+
+            // Abgeschlossen-Sound (zwei Töne nacheinander)
+            let completionDuration = 0.4;
+            completionSoundBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * completionDuration, audioCtx.sampleRate);
+            const completionData = completionSoundBuffer.getChannelData(0);
+            const tone1Duration = 0.15;
+            const tone2Start = 0.2;
+            for (let i = 0; i < completionData.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                if (time < tone1Duration) { // Ton 1
+                    completionData[i] = Math.sin(2 * Math.PI * 523.25 * time) * Math.exp(-time * 10);
+                } else if (time >= tone2Start && time < completionDuration) { // Ton 2
+                    const time2 = time - tone2Start;
+                    completionData[i] = Math.sin(2 * Math.PI * 783.99 * time2) * Math.exp(-time2 * 10);
+                }
+            }
+        }
+
+        function playSound(buffer) {
+            if (!soundsEnabled || !audioCtx || !buffer) return;
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
+        }
+
+        function toggleSounds() {
+            soundsEnabled = !soundsEnabled;
+            updateSetupUI();
+        }
+        // --- ENDE NEU ---
 
         async function initializeApp() {
             await loadWordData();
@@ -225,9 +290,12 @@
             game.exitBtn.addEventListener('click', () => { clearInterval(state.gameInterval); showScreen('setup'); });
             gameOver.restartBtn.addEventListener('click', () => showScreen('setup'));
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
+
+            setup.soundToggleBtn.addEventListener('click', toggleSounds); // NEU
         }
         
         function startGame() {
+            initAudio(); // NEU: Audio-Kontext beim ersten Nutzer-Klick initialisieren
             const selectedTopic = setup.topicSelector.value;
             const selectedList = setup.listSelector.value;
             const wordList = WORD_DATA[selectedTopic][selectedList];
@@ -326,22 +394,20 @@
 
         function handleWordCloudClick(e) {
             const el = e.target;
-            
-            // >> DIESE ZEILEN SIND NEU UND WICHTIG <<
-            // Verhindert die doppelte Ausführung des Codes bei Geräten,
-            // die sowohl touchstart als auch pointerdown auslösen.
-            if (el.dataset.clicked) return; // Wenn schon geklickt, Funktion sofort beenden.
-            el.dataset.clicked = 'true';    // Das Element als "geklickt" markieren.
+            if (el.dataset.clicked) return;
+            el.dataset.clicked = 'true';
             
             el.style.transform = getComputedStyle(el).transform;
             el.style.animation = 'none';
-
             el.style.pointerEvents = 'none';
+
             if (el.textContent === state.targetWord) {
+                playSound(clickSoundBuffer); // NEU: Sound abspielen
                 state.hits++;
                 el.classList.add('correct');
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
+                    playSound(completionSoundBuffer); // NEU: Sound abspielen
                     clearInterval(state.gameInterval);
                     setTimeout(() => {
                         state.level++;
@@ -354,61 +420,37 @@
             setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500);
         }
         
-        // =========================================================================
-        // NEU GESTALTETE Lesemodus-Logik mit dynamischer Schriftgröße
-        // =========================================================================
         async function startReadingMode() {
             game.area.innerHTML = ''; 
             updateHUD(); 
-
-            // Kurze Verzögerung, damit das DOM sich aktualisieren kann, bevor wir messen.
             await new Promise(resolve => setTimeout(resolve, 0)); 
-
             const config = GRID_CONFIGS[state.readingGridSize];
             const TOTAL_WORDS = config.total;
             const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17)));
             state.hitsNeeded = TARGET_COUNT;
-
             const distractors = state.wordList.filter(w => w !== state.targetWord);
             let wordsForPage = [];
-
-            for (let i = 0; i < TARGET_COUNT; i++) {
-                wordsForPage.push(state.targetWord);
-            }
-            for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
-                wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord);
-            }
+            for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord); }
+            for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord); }
             shuffleArray(wordsForPage);
-
-            // 1. Finde das längste Wort in der aktuellen Liste
             const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, "");
-
-            // 2. Berechne die verfügbare Breite einer einzelnen Zelle
             const gameAreaRect = game.area.getBoundingClientRect();
-            const cellPadding = 10; // Ein kleiner Puffer in Pixeln
+            const cellPadding = 10;
             const cellWidth = (gameAreaRect.width / config.cols) - cellPadding;
             const cellHeight = (gameAreaRect.height / config.rows) - cellPadding;
-
-            // 3. Finde die optimale, einheitliche Schriftgröße
             const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight);
-
             const pageContainer = document.createElement('div');
             pageContainer.id = 'reading-page-container';
             pageContainer.style.setProperty('--grid-rows', config.rows);
             pageContainer.style.setProperty('--grid-cols', config.cols);
-
             wordsForPage.forEach(word => {
                 const wordSpan = document.createElement('span');
                 wordSpan.textContent = word;
                 wordSpan.classList.add('reading-word');
                 wordSpan.addEventListener('click', handleReadingWordClick);
-                
-                // 4. Wende die berechnete, einheitliche Schriftgröße auf jedes Wort an
                 wordSpan.style.fontSize = `${optimalFontSize}px`;
-
                 pageContainer.appendChild(wordSpan);
             });
-            
             game.area.appendChild(pageContainer);
             updateHUD();
         }
@@ -417,11 +459,13 @@
             const el = e.target;
             if (el.classList.contains('correct')) return;
             if (el.textContent === state.targetWord) {
+                playSound(clickSoundBuffer); // NEU: Sound abspielen
                 el.classList.add('correct');
                 el.classList.remove('incorrect', 'shake');
                 state.hits++;
                 updateHUD();
                 if (state.hits >= state.hitsNeeded) {
+                    playSound(completionSoundBuffer); // NEU: Sound abspielen
                     setTimeout(() => {
                         state.level++;
                         startLevel();
@@ -433,35 +477,8 @@
             }
         }
         
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        // NEUE HELFER-FUNKTION zum Berechnen der optimalen Schriftgröße
-        function calculateOptimalFontSize(text, maxWidth, maxHeight) {
-            const meter = document.createElement('span');
-            meter.style.position = 'absolute';
-            meter.style.visibility = 'hidden';
-            meter.style.whiteSpace = 'nowrap';
-            meter.textContent = text;
-            document.body.appendChild(meter);
-
-            let fontSize = 100; // Beginne mit einer großen Schriftgröße
-            meter.style.fontSize = `${fontSize}px`;
-            
-            // Verkleinere die Schriftgröße, bis der Text in Breite UND Höhe passt
-            while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) {
-                fontSize--;
-                meter.style.fontSize = `${fontSize}px`;
-            }
-
-            document.body.removeChild(meter); // Räume die "Messlatte" wieder auf
-            return Math.max(fontSize, 8); // Gib eine Mindestgröße zurück
-        }
-
+        function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+        function calculateOptimalFontSize(text, maxWidth, maxHeight) { const meter = document.createElement('span'); meter.style.position = 'absolute'; meter.style.visibility = 'hidden'; meter.style.whiteSpace = 'nowrap'; meter.textContent = text; document.body.appendChild(meter); let fontSize = 100; meter.style.fontSize = `${fontSize}px`; while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) { fontSize--; meter.style.fontSize = `${fontSize}px`; } document.body.removeChild(meter); return Math.max(fontSize, 8); }
         async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
         function populateTopicSelector() { Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
