@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
 
@@ -204,7 +204,7 @@
 
     <script>
     // Dein bisheriger JS-Code bleibt hier, bis zur endGame Funktion...
-    // ...
+    // ... (Hier steht der unveränderte Teil Ihres JS-Codes) ...
     // ...
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -515,7 +515,7 @@
 
                 // Entferne das Element, nachdem die Animation sicher abgeschlossen ist, um den DOM sauber zu halten
                 setTimeout(() => {
-                    el.remove();
+                    if (el) el.remove();
                 }, (delay + duration) * 1000 + 200);
             });
 
