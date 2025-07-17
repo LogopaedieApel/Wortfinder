@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF--8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wortfinder</title>
 
@@ -203,9 +203,6 @@
     </div>
 
     <script>
-    // Dein bisheriger JS-Code bleibt hier, bis zur endGame Funktion...
-    // ... (Hier steht der unveränderte Teil Ihres JS-Codes) ...
-    // ...
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(registration => {
@@ -469,7 +466,7 @@
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
         function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; }
         
-        // --- START: VERBESSERTE endGame Funktion ---
+        // --- START: VERBESSERTE endGame Funktion (mit Garantie für Mindestanzahl) ---
         function endGame() {
             clearInterval(state.gameInterval);
             showScreen('gameOver');
@@ -482,12 +479,28 @@
             container.innerHTML = '';
             finalContent.style.display = 'none';
 
-            // Um eine Überlastung bei sehr langen Listen zu vermeiden, begrenzen wir die Anzahl der animierten Wörter.
-            // Wir mischen sie, damit es jedes Mal etwas anders aussieht.
-            const wordsToAnimate = state.wordList.length > 70 
-                ? shuffleArray([...state.wordList]).slice(0, 70) 
-                : state.wordList;
+            // Logik zur Sicherstellung von genügend Items für einen schönen "Regen"
+            const MIN_RAIN_ITEMS = 40; // Mindestanzahl für einen schönen "Regen"
+            const MAX_RAIN_ITEMS = 70; // Maximalanzahl zur Performance-Schonung
+            let wordsToAnimate = [];
 
+            // Fange den Fall ab, dass die Liste aus irgendeinem Grund leer sein könnte
+            if (state.wordList.length === 0) {
+                finalContent.style.display = 'flex'; // Zeige sofort Inhalt, da keine Animation möglich ist
+                return;
+            }
+
+            if (state.wordList.length < MIN_RAIN_ITEMS) {
+                // Die Liste ist klein. Füllen wir die Animationsliste künstlich auf.
+                for (let i = 0; i < MIN_RAIN_ITEMS; i++) {
+                    const randomWord = state.wordList[Math.floor(Math.random() * state.wordList.length)];
+                    wordsToAnimate.push(randomWord);
+                }
+            } else {
+                // Die Liste ist groß genug. Begrenzen wir sie auf das Maximum für die Performance.
+                wordsToAnimate = shuffleArray([...state.wordList]).slice(0, MAX_RAIN_ITEMS);
+            }
+            
             wordsToAnimate.forEach(word => {
                 const el = document.createElement('span');
                 el.textContent = word;
@@ -496,16 +509,14 @@
                 // Generiere zufällige Werte für eine dynamische Animation
                 const delay = Math.random() * 2.5;      // Startverzögerung (bis zu 2.5s)
                 const duration = 3 + Math.random() * 2; // Dauer des Falls (3s bis 5s)
-                const startX = Math.random() * 95;      // Startposition X (in vw, 95 statt 100 um Scrollbalken zu vermeiden)
+                const startX = Math.random() * 95;      // Startposition X (in vw)
                 const fontSize = 1 + Math.random() * 2; // Schriftgröße (1em bis 3em)
-                const startRotation = -25 + Math.random() * 50; // Start-Rotation (-25deg bis +25deg)
-                const endRotation = startRotation + (-40 + Math.random() * 80); // End-Rotation
+                const startRotation = -25 + Math.random() * 50; // Start-Rotation
+                const endRotation = startRotation + (-40 + Math.random() * 80);
 
-                // Setze die CSS-Variablen, die von der @keyframes-Regel gelesen werden
                 el.style.setProperty('--start-rot', `${startRotation}deg`);
                 el.style.setProperty('--end-rot', `${endRotation}deg`);
                 
-                // Wende die anderen zufälligen Stile an
                 el.style.left = `${startX}vw`;
                 el.style.fontSize = `${fontSize}em`;
                 el.style.animationDelay = `${delay}s`;
@@ -513,7 +524,7 @@
                 
                 container.appendChild(el);
 
-                // Entferne das Element, nachdem die Animation sicher abgeschlossen ist, um den DOM sauber zu halten
+                // Entferne das Element, nachdem die Animation sicher abgeschlossen ist
                 setTimeout(() => {
                     if (el) el.remove();
                 }, (delay + duration) * 1000 + 200);
@@ -522,7 +533,6 @@
             // Zeige den finalen Inhalt erst an, nachdem die Animation begonnen hat
             setTimeout(() => {
                 finalContent.style.display = 'flex';
-                // Die CSS-Animation "fadeInContent" startet automatisch
             }, 3000); // 3 Sekunden warten, damit der Regen-Effekt gut sichtbar ist
         }
         // --- ENDE: VERBESSERTE endGame Funktion ---
