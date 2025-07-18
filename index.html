@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -53,6 +54,16 @@
         .btn-secondary { background-color: var(--button-bg); color: var(--text-color); }
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
+        /* --- NEU: Stil für das Logo --- */
+        #start-screen-logo {
+            position: absolute;
+            bottom: 100px;
+            right: 100px;
+            width: 100px;  /* Gemäß Ihrer Zeichnung */
+            height: 100px; /* Gemäß Ihrer Zeichnung */
+            pointer-events: none; /* Stellt sicher, dass das Logo nicht versehentlich klickbar ist */
+        }
+
         /* Game-Screen */
         #game-screen { justify-content: flex-start; padding: 0; } 
         #game-hud { width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; flex-shrink: 0; }
@@ -189,6 +200,8 @@
             <div class="action-buttons"> <button id="start-game-btn" class="btn btn-primary">Spiel starten</button> <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button> </div>
             <p id="error-message"></p>
         </div>
+        <!-- NEU: Logo-Bild hinzugefügt -->
+        <img src="logo.png" alt="Firmenlogo" id="start-screen-logo">
     </div>
     
     <div id="game-screen" class="screen"><div id="game-hud"><div id="game-stats"><span id="level-display">Level: 1</span><span id="hits-display">Treffer: 0 / 10</span></div><div id="target-word-display"></div><div id="game-actions"><button id="exit-game-btn" class="btn btn-secondary">Beenden</button><button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button></div></div><div id="game-area"></div></div>
