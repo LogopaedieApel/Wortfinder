@@ -15,6 +15,13 @@
     <meta name="apple-mobile-web-app-title" content="Wortfinder">
     <link rel="apple-touch-icon" href="icon-192x192.png">
 
+    <!-- ===== NEU: Einbinden der lesefreundlichen Schriftart "Nunito" von Google Fonts ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <!-- ===== ENDE: NEUE SCHRIFTART ===== -->
+
+
     <style>
         /* CSS-Variablen und grundlegende Stile */
         :root {
@@ -53,14 +60,13 @@
         .btn-secondary { background-color: var(--button-bg); color: var(--text-color); }
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
-        /* --- NEU: Stil für das Logo --- */
         #start-screen-logo {
             position: absolute;
             bottom: 100px;
             right: 100px;
-            width: 100px;  /* Gemäß Ihrer Zeichnung */
-            height: 100px; /* Gemäß Ihrer Zeichnung */
-            pointer-events: none; /* Stellt sicher, dass das Logo nicht versehentlich klickbar ist */
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
         }
 
         /* Game-Screen */
@@ -91,6 +97,8 @@
             transition: background-color 0.2s, color 0.2s;
             user-select: none;
             line-height: 1;
+            /* ===== NEU: Anwenden der lesefreundlichen Schriftart ===== */
+            font-family: 'Nunito', sans-serif;
         }
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
@@ -103,8 +111,8 @@
         
         /* --- START: VERBESSERTE Game-Over Screen Stile --- */
         #game-over-screen {
-            justify-content: flex-start; /* Stellt sicher, dass der Animationscontainer den ganzen Platz hat */
-            overflow: hidden; /* Verhindert Scrollbalken durch Off-Screen-Elemente */
+            justify-content: flex-start;
+            overflow: hidden;
         }
         #game-over-animation-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5;
@@ -119,35 +127,28 @@
             will-change: transform;
             animation-name: word-rain-fall;
             animation-timing-function: linear;
-            animation-fill-mode: forwards; /* Bleibt am Endpunkt der Animation */
-            /* ===== DAS FÜGEN SIE HINZU ===== */
-            /* Dieses Wort ist standardmäßig unsichtbar. */
+            animation-fill-mode: forwards;
             opacity: 0;
         }
 
-        /* --- NEUE, KORRIGIERTE ANIMATION --- */
         @keyframes word-rain-fall {
             0% {
-                /* Startet weit außerhalb des Bildschirms und komplett unsichtbar */
                 transform: translateY(-50vh) rotate(var(--start-rot));
                 opacity: 0;
             }
             5% {
-                /* Wird sichtbar, während es sich immer noch außerhalb befindet */
                 opacity: 1;
             }
             100% {
-                /* Fällt komplett durch den Bildschirm hindurch und verlässt ihn unten */
                 transform: translateY(110vh) rotate(var(--end-rot));
                 opacity: 1;
             }
         }
         
         #game-over-content {
-            display: none; /* Wird per JS auf 'flex' gesetzt, wenn die Animation läuft */
+            display: none;
             flex-direction: column; align-items: center; justify-content: center;
             width: 100%; height: 100%; z-index: 10;
-            /*background-color: rgba(26, 26, 26, 0.7); vollständig auf trasparent gesetzt durch auskommentieren */
             animation: fadeInContent 1s ease-in forwards;
         }
         @keyframes fadeInContent {
@@ -199,13 +200,11 @@
             <div class="action-buttons"> <button id="start-game-btn" class="btn btn-primary">Spiel starten</button> <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button> </div>
             <p id="error-message"></p>
         </div>
-        <!-- NEU: Logo-Bild hinzugefügt -->
         <img src="logo.png" alt="Firmenlogo" id="start-screen-logo">
     </div>
     
     <div id="game-screen" class="screen"><div id="game-hud"><div id="game-stats"><span id="level-display">Level: 1</span><span id="hits-display">Treffer: 0 / 10</span></div><div id="target-word-display"></div><div id="game-actions"><button id="exit-game-btn" class="btn btn-secondary">Beenden</button><button id="fullscreen-btn-game" class="btn btn-secondary">Vollbild</button></div></div><div id="game-area"></div></div>
 
-    <!-- --- Überarbeiteter Game-Over Screen --- -->
     <div id="game-over-screen" class="screen">
         <div id="game-over-animation-container"></div>
         <div id="game-over-content" style="display: none; text-align: center;">
@@ -232,7 +231,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         let WORD_DATA = {};
         const TOPICS_TO_LOAD = { 
-            "Artikulation Emoji)": "artikulation.json", 
+            "Artikulation": "artikulation.json", 
             "Wortschatz (Emoji)": "wortschatz.json", 
             "Lesen": "lesen.json" 
         };
@@ -378,7 +377,6 @@
                 return;
             }
             setup.errorMessage.style.display = 'none';
-            // Annahme: Die JSON enthält bereits eindeutige Objekte.
             state.wordList = [...wordList];
             state.level = 1;
             state.hits = 0;
@@ -409,26 +407,20 @@
             }
         }
         
-        // ===== START: ERSETZTE FUNKTION updateHUD =====
         function updateHUD() {
             game.levelDisplay.textContent = `Level: ${state.level} von ${state.wordList.length}`;
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
 
-            // Intelligente Anzeige des Ziels
             let displayText;
-            // Wenn der Titel und das Emoji identisch sind (was bei "Lesen" der Fall ist),
-            // oder wenn es aus irgendeinem Grund keinen Titel gibt, zeigen wir nur das "Emoji" (also das Wort).
             if (state.targetWord.title === state.targetWord.emoji || !state.targetWord.title) {
                 displayText = state.targetWord.emoji;
             } else {
-                // Ansonsten (bei Wortschatz/Artikulation) zeigen wir beides an.
                 displayText = `${state.targetWord.title} ${state.targetWord.emoji}`;
             }
             
             game.targetWordDisplay.textContent = `Ziel: ${displayText}`;
             game.targetWordDisplay.style.visibility = 'visible';
         }
-        // ===== ENDE: ERSETZTE FUNKTION updateHUD =====
 
         function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
         function spawnWordRain() { 
@@ -438,13 +430,11 @@
             for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); }
             if (freeLanes.length === 0) return;
             
-            // --- GEÄNDERT ---
-            let wordToSpawn; // wordToSpawn ist jetzt ein Objekt
+            let wordToSpawn; 
             const probabilityThreshold = state.targetWordFrequency / 100;
             if (Math.random() < probabilityThreshold) { 
                 wordToSpawn = state.targetWord; 
             } else { 
-                // Vergleiche Objekte anhand ihrer Referenz
                 const distractors = state.wordList.filter(w => w !== state.targetWord); 
                 wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;
             } 
@@ -452,8 +442,7 @@
             const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)];
             const el = document.createElement('div');
             
-            // --- GEÄNDERT ---
-            el.textContent = wordToSpawn.emoji; // Zeige nur das Emoji an
+            el.textContent = wordToSpawn.emoji; 
             
             el.classList.add('game-word', 'word-fly-in');
             const areaRect = game.area.getBoundingClientRect();
@@ -483,7 +472,6 @@
             el.style.animation = 'none';
             el.style.pointerEvents = 'none';
             
-            // --- GEÄNDERT ---
             if (el.textContent === state.targetWord.emoji) {
                 playSound(clickSoundBuffer);
                 state.hits++;
@@ -516,23 +504,18 @@
             const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17)));
             state.hitsNeeded = TARGET_COUNT;
             
-            // --- GEÄNDERT ---
-            // distractors sind die vollen Objekte
             const distractors = state.wordList.filter(w => w !== state.targetWord); 
-            let wordsForPage = []; // Diese Liste enthält nur die Emoji-Strings
+            let wordsForPage = []; 
             
-            // Füge die Ziel-Emojis hinzu
             for (let i = 0; i < TARGET_COUNT; i++) {
                 wordsForPage.push(state.targetWord.emoji);
             }
-            // Füge die Ablenker-Emojis hinzu
             for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
                 wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)].emoji : state.targetWord.emoji);
             }
             
             shuffleArray(wordsForPage);
             
-            // Der Rest der Funktion arbeitet wie gewohnt mit dem Array von Emoji-Strings
             const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, "");
             const cellPadding = 10;
             const cellWidth = (game.area.clientWidth / config.cols) - cellPadding;
@@ -562,7 +545,6 @@
             const el = e.target;
             if (el.classList.contains('correct')) return;
             
-            // --- GEÄNDERT ---
             if (el.textContent === state.targetWord.emoji) {
                 playSound(clickSoundBuffer);
                 el.classList.add('correct');
@@ -586,7 +568,6 @@
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
         function calculateOptimalFontSize(text, maxWidth, maxHeight) { const meter = document.createElement('span'); meter.classList.add('reading-word'); meter.style.position = 'absolute'; meter.style.visibility = 'hidden'; meter.style.whiteSpace = 'nowrap'; meter.textContent = text; document.body.appendChild(meter); let fontSize = 100; meter.style.fontSize = `${fontSize}px`; while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) { fontSize--; meter.style.fontSize = `${fontSize}px`; } document.body.removeChild(meter); return Math.max(fontSize * 0.9, 8); }
         
-        // ===== START: ERSETZTE FUNKTION loadWordData =====
         async function loadWordData() {
             try {
                 const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => {
@@ -595,14 +576,9 @@
                     
                     let topicData = await response.json();
 
-                    // Normalisierungs-Logik, um alle Datenformate anzugleichen
                     for (const listName in topicData) {
                         const list = topicData[listName];
-                        
-                        // Prüfen, ob die Liste existiert und das erste Element ein String ist (Indikator für "Lesen"-Format).
                         if (Array.isArray(list) && list.length > 0 && typeof list[0] === 'string') {
-                            // Wandle jeden String in das erwartete Objektformat um.
-                            // Das Wort selbst wird sowohl als Titel als auch als "Emoji" (Anzeige-Element) verwendet.
                             topicData[listName] = list.map(word => ({ title: word, emoji: word }));
                         }
                     }
@@ -618,7 +594,6 @@
                 throw error;
             }
         }
-        // ===== ENDE: ERSETZTE FUNKTION loadWordData =====
 
         function populateTopicSelector() { setup.topicSelector.innerHTML = ''; Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; if(!WORD_DATA[selectedTopic]) return; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
@@ -657,8 +632,7 @@
             
             wordsToAnimate.forEach(word => {
                 const el = document.createElement('span');
-                // --- GEÄNDERT ---
-                el.textContent = word.emoji; // word ist jetzt ein Objekt
+                el.textContent = word.emoji;
                 el.classList.add('rain-word');
 
                 const delay = Math.random() * 0.5;
