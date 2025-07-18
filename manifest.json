@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#FF8C00",
-  "description": "Ein Spiel zum Finden von Wörtern in einer Wolke oder einem Text.",
+  "description": "Spiele zum Benennen von Buchstaben und Wörtern.",
   "icons": [
     {
       "src": "icon-192x192.png",
