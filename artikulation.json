@@ -158,6 +158,52 @@
     { "title": "Tiere", "emoji": "🐕🐈‍⬛🐄🦆" },
     { "title": "Strümpfe", "emoji": "🧦" }
   ],
+  "TR initial (Emoji)": [
+    { "title": "Traktor", "emoji": "🚜" },
+    { "title": "Traube", "emoji": "🍇" },
+    { "title": "traurig", "emoji": "😢" },
+    { "title": "Treppe", "emoji": "🪜" },
+    { "title": "trinken", "emoji": "🥤" },
+    { "title": "Tropfen", "emoji": "💧" },
+    { "title": "Trompete", "emoji": "🎺" },
+    { "title": "tragen", "emoji": "💪" },
+    { "title": "Traum", "emoji": "💭" },
+    { "title": "treffen", "emoji": "🤝" }
+  ],
+  "KR initial (Emoji)": [
+    { "title": "krank", "emoji": "🤒" },
+    { "title": "Kreis", "emoji": "⭕" },
+    { "title": "Kreuz", "emoji": "❌" },
+    { "title": "kriechen", "emoji": "🐛" },
+    { "title": "Krokodil", "emoji": "🐊" },
+    { "title": "Krone", "emoji": "👑" },
+    { "title": "Kran", "emoji": "🏗️" },
+    { "title": "Krabbe", "emoji": "🦀" },
+    { "title": "Krawatte", "emoji": "👔" },
+    { "title": "Kreide", "emoji": "🖍️" }
+  ],
+  "DR initial (Emoji)": [
+    { "title": "drücken", "emoji": "👇" },
+    { "title": "drei", "emoji": "3️⃣" },
+    { "title": "Drache", "emoji": "🐉" },
+    { "title": "draußen", "emoji": "🏞️" },
+    { "title": "drehen", "emoji": "🔄" },
+    { "title": "Drucker", "emoji": "🖨️" },
+    { "title": "dringend", "emoji": "🚨" },
+    { "title": "Drohne", "emoji": "🛸" }
+  ],
+  "GR initial (Emoji)": [
+    { "title": "groß", "emoji": "🐘" },
+    { "title": "grün", "emoji": "🟩" },
+    { "title": "Gras", "emoji": "🌱" },
+    { "title": "greifen", "emoji": "🤏" },
+    { "title": "grillen", "emoji": "🔥🍗" },
+    { "title": "graben", "emoji": "⛏️" },
+    { "title": "gruselig", "emoji": "👻" },
+    { "title": "Gruppe", "emoji": "👨‍👩‍👧‍👦" },
+    { "title": "Grenze", "emoji": "🚧" },
+    { "title": "grau", "emoji": "🐘" }
+  ],
   "T initial (Emoji)": [
     { "title": "Taschen", "emoji": "🛍️" },
     { "title": "Tomate", "emoji": "🍅" },
