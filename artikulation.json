@@ -87,6 +87,21 @@
     { "title": "Löcher", "emoji": "🕳️🕳️" },
     { "title": "Früchte", "emoji": "🍇🍍🍊" }
   ],
+  "G initial (Emoji)": [
+    { "title": "Gabel", "emoji": "🍴" },
+    { "title": "Geist", "emoji": "👻" },
+    { "title": "Geschenk", "emoji": "🎁" },
+    { "title": "Gitarre", "emoji": "🎸" },
+    { "title": "Glas", "emoji": "🥛" },
+    { "title": "Geld", "emoji": "💰" },
+    { "title": "Giraffe", "emoji": "🦒" },
+    { "title": "Gold", "emoji": "🥇" },
+    { "title": "Gurke", "emoji": "🥒" },
+    { "title": "grün", "emoji": "🟩" },
+    { "title": "gelb", "emoji": "🟨" },
+    { "title": "Gorilla", "emoji": "🦍" },
+    { "title": "Gesicht", "emoji": "🙂" }
+  ],
   "Z initial (Emoji)": [
     { "title": "Zunge", "emoji": "👅" },
     { "title": "Zahn", "emoji": "🦷" },
