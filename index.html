@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -370,12 +369,13 @@
             const selectedList = setup.listSelector.value;
             const wordList = WORD_DATA[selectedTopic][selectedList];
             if (!wordList || wordList.length < 2) { 
-                setup.errorMessage.textContent = "Die Liste muss mindestens 2 verschiedene Wörter enthalten.";
+                setup.errorMessage.textContent = "Die Liste muss mindestens 2 verschiedene Elemente enthalten.";
                 setup.errorMessage.style.display = 'block';
                 return;
             }
             setup.errorMessage.style.display = 'none';
-            state.wordList = [...new Set(wordList)];
+            // Annahme: Die JSON enthält bereits eindeutige Objekte.
+            state.wordList = [...wordList];
             state.level = 1;
             state.hits = 0;
             state.usedTargetWords = [];
@@ -408,12 +408,53 @@
         function updateHUD() {
             game.levelDisplay.textContent = `Level: ${state.level} von ${state.wordList.length}`;
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
-            game.targetWordDisplay.textContent = `Ziel: ${state.targetWord}`;
+            // --- GEÄNDERT ---
+            game.targetWordDisplay.textContent = `Ziel: ${state.targetWord.title} ${state.targetWord.emoji}`;
             game.targetWordDisplay.style.visibility = 'visible';
         }
 
         function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
-        function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord; } const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleWordCloudClick); el.addEventListener('touchstart', handleWordCloudClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
+        function spawnWordRain() { 
+            if (document.hidden) return;
+            const now = Date.now();
+            const freeLanes = []; 
+            for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); }
+            if (freeLanes.length === 0) return;
+            
+            // --- GEÄNDERT ---
+            let wordToSpawn; // wordToSpawn ist jetzt ein Objekt
+            const probabilityThreshold = state.targetWordFrequency / 100;
+            if (Math.random() < probabilityThreshold) { 
+                wordToSpawn = state.targetWord; 
+            } else { 
+                // Vergleiche Objekte anhand ihrer Referenz
+                const distractors = state.wordList.filter(w => w !== state.targetWord); 
+                wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;
+            } 
+            
+            const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)];
+            const el = document.createElement('div');
+            
+            // --- GEÄNDERT ---
+            el.textContent = wordToSpawn.emoji; // Zeige nur das Emoji an
+            
+            el.classList.add('game-word', 'word-fly-in');
+            const areaRect = game.area.getBoundingClientRect();
+            const laneHeight = areaRect.height / state.numLanes;
+            el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`;
+            const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100);
+            const randomDeviation = (Math.random() * 2 - 1) * varianceAmount;
+            const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation);
+            el.style.animationDuration = `${finalAnimationDuration}ms`;
+            el.addEventListener('pointerdown', handleWordCloudClick);
+            el.addEventListener('touchstart', handleWordCloudClick, { passive: true });
+            game.area.appendChild(el);
+            const wordWidth = el.offsetWidth;
+            const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000);
+            const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
+            state.laneStates[laneIndex] = now + clearanceTime * 1000;
+            setTimeout(() => el.remove(), finalAnimationDuration);
+        }
         
         function handleWordCloudClick(e) {
             if (state.levelWirdGewechselt) return;
@@ -424,7 +465,9 @@
             el.style.transform = getComputedStyle(el).transform;
             el.style.animation = 'none';
             el.style.pointerEvents = 'none';
-            if (el.textContent === state.targetWord) {
+            
+            // --- GEÄNDERT ---
+            if (el.textContent === state.targetWord.emoji) {
                 playSound(clickSoundBuffer);
                 state.hits++;
                 el.classList.add('correct');
@@ -447,14 +490,63 @@
             }, 500);
         }
 
-        async function startReadingMode() { game.area.innerHTML = ''; updateHUD(); await new Promise(resolve => setTimeout(resolve, 0)); const config = GRID_CONFIGS[state.readingGridSize]; const TOTAL_WORDS = config.total; const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17))); state.hitsNeeded = TARGET_COUNT; const distractors = state.wordList.filter(w => w !== state.targetWord); let wordsForPage = []; for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord); } for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord); } shuffleArray(wordsForPage); const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, ""); const cellPadding = 10; const cellWidth = (game.area.clientWidth / config.cols) - cellPadding; const cellHeight = (game.area.clientHeight / config.rows) - cellPadding; const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight); const pageContainer = document.createElement('div'); pageContainer.id = 'reading-page-container'; pageContainer.style.setProperty('--grid-rows', config.rows); pageContainer.style.setProperty('--grid-cols', config.cols); wordsForPage.forEach(word => { const wordSpan = document.createElement('span'); wordSpan.textContent = word; wordSpan.classList.add('reading-word'); wordSpan.addEventListener('click', handleReadingWordClick); wordSpan.style.fontSize = `${optimalFontSize}px`; pageContainer.appendChild(wordSpan); }); game.area.appendChild(pageContainer); updateHUD(); }
+        async function startReadingMode() {
+            game.area.innerHTML = '';
+            updateHUD();
+            await new Promise(resolve => setTimeout(resolve, 0));
+            const config = GRID_CONFIGS[state.readingGridSize];
+            const TOTAL_WORDS = config.total;
+            const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17)));
+            state.hitsNeeded = TARGET_COUNT;
+            
+            // --- GEÄNDERT ---
+            // distractors sind die vollen Objekte
+            const distractors = state.wordList.filter(w => w !== state.targetWord); 
+            let wordsForPage = []; // Diese Liste enthält nur die Emoji-Strings
+            
+            // Füge die Ziel-Emojis hinzu
+            for (let i = 0; i < TARGET_COUNT; i++) {
+                wordsForPage.push(state.targetWord.emoji);
+            }
+            // Füge die Ablenker-Emojis hinzu
+            for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
+                wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)].emoji : state.targetWord.emoji);
+            }
+            
+            shuffleArray(wordsForPage);
+            
+            // Der Rest der Funktion arbeitet wie gewohnt mit dem Array von Emoji-Strings
+            const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, "");
+            const cellPadding = 10;
+            const cellWidth = (game.area.clientWidth / config.cols) - cellPadding;
+            const cellHeight = (game.area.clientHeight / config.rows) - cellPadding;
+            const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight);
+            
+            const pageContainer = document.createElement('div');
+            pageContainer.id = 'reading-page-container';
+            pageContainer.style.setProperty('--grid-rows', config.rows);
+            pageContainer.style.setProperty('--grid-cols', config.cols);
+            
+            wordsForPage.forEach(word => {
+                const wordSpan = document.createElement('span');
+                wordSpan.textContent = word;
+                wordSpan.classList.add('reading-word');
+                wordSpan.addEventListener('click', handleReadingWordClick);
+                wordSpan.style.fontSize = `${optimalFontSize}px`;
+                pageContainer.appendChild(wordSpan);
+            });
+            game.area.appendChild(pageContainer);
+            updateHUD();
+        }
         
         function handleReadingWordClick(e) {
             if (state.levelWirdGewechselt) return;
 
             const el = e.target;
             if (el.classList.contains('correct')) return;
-            if (el.textContent === state.targetWord) {
+            
+            // --- GEÄNDERT ---
+            if (el.textContent === state.targetWord.emoji) {
                 playSound(clickSoundBuffer);
                 el.classList.add('correct');
                 el.classList.remove('incorrect', 'shake');
@@ -514,7 +606,8 @@
             
             wordsToAnimate.forEach(word => {
                 const el = document.createElement('span');
-                el.textContent = word;
+                // --- GEÄNDERT ---
+                el.textContent = word.emoji; // word ist jetzt ein Objekt
                 el.classList.add('rain-word');
 
                 const delay = Math.random() * 0.5;
