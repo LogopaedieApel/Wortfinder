@@ -232,7 +232,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         let WORD_DATA = {};
         const TOPICS_TO_LOAD = { 
-            "Artikulation (Emoji)": "artikulation.json", 
+            "Artikulation": "artikulation.json", 
             "Wortschatz (Emoji)": "wortschatz.json", 
             "Lesen": "lesen.json" 
         };
@@ -409,13 +409,26 @@
             }
         }
         
+        // ===== START: ERSETZTE FUNKTION updateHUD =====
         function updateHUD() {
             game.levelDisplay.textContent = `Level: ${state.level} von ${state.wordList.length}`;
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
-            // --- GEÄNDERT ---
-            game.targetWordDisplay.textContent = `Ziel: ${state.targetWord.title} ${state.targetWord.emoji}`;
+
+            // Intelligente Anzeige des Ziels
+            let displayText;
+            // Wenn der Titel und das Emoji identisch sind (was bei "Lesen" der Fall ist),
+            // oder wenn es aus irgendeinem Grund keinen Titel gibt, zeigen wir nur das "Emoji" (also das Wort).
+            if (state.targetWord.title === state.targetWord.emoji || !state.targetWord.title) {
+                displayText = state.targetWord.emoji;
+            } else {
+                // Ansonsten (bei Wortschatz/Artikulation) zeigen wir beides an.
+                displayText = `${state.targetWord.title} ${state.targetWord.emoji}`;
+            }
+            
+            game.targetWordDisplay.textContent = `Ziel: ${displayText}`;
             game.targetWordDisplay.style.visibility = 'visible';
         }
+        // ===== ENDE: ERSETZTE FUNKTION updateHUD =====
 
         function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
         function spawnWordRain() { 
@@ -572,7 +585,41 @@
 
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
         function calculateOptimalFontSize(text, maxWidth, maxHeight) { const meter = document.createElement('span'); meter.classList.add('reading-word'); meter.style.position = 'absolute'; meter.style.visibility = 'hidden'; meter.style.whiteSpace = 'nowrap'; meter.textContent = text; document.body.appendChild(meter); let fontSize = 100; meter.style.fontSize = `${fontSize}px`; while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) { fontSize--; meter.style.fontSize = `${fontSize}px`; } document.body.removeChild(meter); return Math.max(fontSize * 0.9, 8); }
-        async function loadWordData() { try { const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => { const response = await fetch(fileName); if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`); WORD_DATA[topicName] = await response.json(); }); await Promise.all(fetchPromises); } catch (error) { console.error("Fehler beim Laden der Wortlisten:", error); document.getElementById('main-title').textContent = "Fehler!"; setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`; setup.errorMessage.style.display = 'block'; setup.startGameBtn.disabled = true; throw error; } }
+        
+        // ===== START: ERSETZTE FUNKTION loadWordData =====
+        async function loadWordData() {
+            try {
+                const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => {
+                    const response = await fetch(fileName);
+                    if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`);
+                    
+                    let topicData = await response.json();
+
+                    // Normalisierungs-Logik, um alle Datenformate anzugleichen
+                    for (const listName in topicData) {
+                        const list = topicData[listName];
+                        
+                        // Prüfen, ob die Liste existiert und das erste Element ein String ist (Indikator für "Lesen"-Format).
+                        if (Array.isArray(list) && list.length > 0 && typeof list[0] === 'string') {
+                            // Wandle jeden String in das erwartete Objektformat um.
+                            // Das Wort selbst wird sowohl als Titel als auch als "Emoji" (Anzeige-Element) verwendet.
+                            topicData[listName] = list.map(word => ({ title: word, emoji: word }));
+                        }
+                    }
+                    WORD_DATA[topicName] = topicData; 
+                });
+                await Promise.all(fetchPromises);
+            } catch (error) {
+                console.error("Fehler beim Laden der Wortlisten:", error);
+                document.getElementById('main-title').textContent = "Fehler!";
+                setup.errorMessage.textContent = `Wortlisten konnten nicht geladen werden. Prüfe die Konsole (F12) und ob die JSON-Dateien im selben Ordner liegen.`;
+                setup.errorMessage.style.display = 'block';
+                setup.startGameBtn.disabled = true;
+                throw error;
+            }
+        }
+        // ===== ENDE: ERSETZTE FUNKTION loadWordData =====
+
         function populateTopicSelector() { setup.topicSelector.innerHTML = ''; Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; if(!WORD_DATA[selectedTopic]) return; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
         function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
