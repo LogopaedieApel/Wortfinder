@@ -15,11 +15,11 @@
     <meta name="apple-mobile-web-app-title" content="Wortfinder">
     <link rel="apple-touch-icon" href="icon-192x192.png">
 
-    <!-- ===== NEU: Einbinden der lesefreundlichen Schriftart "Nunito" von Google Fonts ===== -->
+    <!-- ===== KORREKTUR: Einbinden der Schriftart "Lexend" mit einstöckigem 'a' ===== -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-    <!-- ===== ENDE: NEUE SCHRIFTART ===== -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <!-- ===== ENDE: KORREKTUR ===== -->
 
 
     <style>
@@ -90,15 +90,15 @@
         }
         .reading-word {
             display: flex;
-            justify-content: center; /* Zentriert horizontal */
-            align-items: center;     /* Zentriert vertikal */
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
             border-radius: 4px;
             transition: background-color 0.2s, color 0.2s;
             user-select: none;
             line-height: 1;
-            /* ===== NEU: Anwenden der lesefreundlichen Schriftart ===== */
-            font-family: 'Nunito', sans-serif;
+            /* ===== KORREKTUR: Anwenden der lesefreundlichen Schriftart "Lexend" ===== */
+            font-family: 'Lexend', sans-serif;
         }
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
