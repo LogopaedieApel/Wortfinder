@@ -16,7 +16,7 @@
   ],
   "Fahrzeuge (Emoji)": [
     { "title": "Schiff", "emoji": "🚢" },
-    { "title": "Zug", "emoji": "🚉" },
+    { "title": "Zug", "emoji": "🚆" },
     { "title": "Bus", "emoji": "🚌" },
     { "title": "Taxi", "emoji": "🚕" },
     { "title": "Auto", "emoji": "🚗" },
@@ -39,7 +39,7 @@
     { "title": "Huhn", "emoji": "🐔" },
     { "title": "Elefant", "emoji": "🐘" },
     { "title": "Löwe", "emoji": "🦁" },
-    { "title": "Vogel", "emoji": "🐦‍⬛" }
+    { "title": "Vogel", "emoji": "🐦" }
   ],
   "Farben (Emoji)": [
     { "title": "Rot", "emoji": "🟥" },
@@ -53,18 +53,18 @@
     { "title": "Lila", "emoji": "🟪" }
   ],
   "Zahlen (Emoji)": [
-    { "title": "Null", "emoji": "0" },
-    { "title": "Eins", "emoji": "1" },
-    { "title": "Zwei", "emoji": "2" },
-    { "title": "Drei", "emoji": "3" },
-    { "title": "Vier", "emoji": "4" },
-    { "title": "Fünf", "emoji": "5" },
-    { "title": "Sechs", "emoji": "6" },
-    { "title": "Sieben", "emoji": "7" },
-    { "title": "Acht", "emoji": "8" },
-    { "title": "Neun", "emoji": "9" },
-    { "title": "Zehn", "emoji": "10" },
-    { "title": "Elf", "emoji": "11" }
+    { "title": "Null", "emoji": "0️⃣" },
+    { "title": "Eins", "emoji": "1️⃣" },
+    { "title": "Zwei", "emoji": "2️⃣" },
+    { "title": "Drei", "emoji": "3️⃣" },
+    { "title": "Vier", "emoji": "4️⃣" },
+    { "title": "Fünf", "emoji": "5️⃣" },
+    { "title": "Sechs", "emoji": "6️⃣" },
+    { "title": "Sieben", "emoji": "7️⃣" },
+    { "title": "Acht", "emoji": "8️⃣" },
+    { "title": "Neun", "emoji": "9️⃣" },
+    { "title": "Zehn", "emoji": "🔟" },
+    { "title": "Elf", "emoji": "1️⃣1️⃣" }
   ],
   "Obst (Emoji)": [
     { "title": "Apfel", "emoji": "🍎" },
@@ -86,19 +86,19 @@
     { "title": "Kartoffel", "emoji": "🥔" },
     { "title": "Gurke", "emoji": "🥒" },
     { "title": "Karotte", "emoji": "🥕" },
-    { "title": "Paprika", "emoji": "🫑🌶️" },
+    { "title": "Paprika", "emoji": "🫑" },
     { "title": "Brokkoli", "emoji": "🥦" },
     { "title": "Erbse", "emoji": "🫛" },
-    { "title": "Salat", "emoji": "🥗" },
+    { "title": "Salat", "emoji": "🥬" },
     { "title": "Kürbis", "emoji": "🎃" },
     { "title": "Aubergine", "emoji": "🍆" },
     { "title": "Zwiebel", "emoji": "🧅" }
   ],
   "Sport (Emoji)": [
     { "title": "Rollschuh", "emoji": "🛼" },
-    { "title": "Fußball", "emoji": "⚽🥅" },
+    { "title": "Fußball", "emoji": "⚽" },
     { "title": "Skateboard", "emoji": "🛹" },
-    { "title": "Basketball", "emoji": "⛹️🏀" },
+    { "title": "Basketball", "emoji": "🏀" },
     { "title": "Tischtennis", "emoji": "🏓" },
     { "title": "Turnen", "emoji": "🤸" },
     { "title": "Federball", "emoji": "🏸" },
@@ -126,18 +126,18 @@
     { "title": "Radio", "emoji": "📻" }
   ],
   "Berufe (Emoji)": [
-    { "title": "Polizist", "emoji": "👮🚔" },
+    { "title": "Polizist", "emoji": "👮" },
     { "title": "Wissenschaftler", "emoji": "🧑‍🔬" },
-    { "title": "Arzt", "emoji": "🧑‍⚕️💉" },
-    { "title": "Bauarbeiter", "emoji": "👷🚧" },
+    { "title": "Arzt", "emoji": "🧑‍⚕️" },
+    { "title": "Bauarbeiter", "emoji": "👷" },
     { "title": "Lehrer", "emoji": "🧑‍🏫" },
-    { "title": "Bäcker", "emoji": "🧑‍🍳🥖" },
-    { "title": "Koch", "emoji": "🧑‍🍳🍳" },
-    { "title": "Feuerwehrmann", "emoji": "🧑‍🚒🚒" },
+    { "title": "Bäcker", "emoji": "🧑‍🍳" },
+    { "title": "Koch", "emoji": "👨‍🍳" },
+    { "title": "Feuerwehrmann", "emoji": "🧑‍🚒" },
     { "title": "Sänger", "emoji": "🧑‍🎤" },
-    { "title": "Astronaut", "emoji": "🧑‍🚀🚀" },
-    { "title": "Zauberer", "emoji": "🧙🪄" },
-    { "title": "Maler", "emoji": "🧑‍🎨🖌️" }
+    { "title": "Astronaut", "emoji": "🧑‍🚀" },
+    { "title": "Zauberer", "emoji": "🧙" },
+    { "title": "Maler", "emoji": "🧑‍🎨" }
   ],
   "kleine Tiere (Emoji)": [
     { "title": "Maus", "emoji": "🐁" },
@@ -145,7 +145,7 @@
     { "title": "Wurm", "emoji": "🪱" },
     { "title": "Spinne", "emoji": "🕷️" },
     { "title": "Eichhörnchen", "emoji": "🐿️" },
-    { "title": "Vogel", "emoji": "🐦‍⬛" },
+    { "title": "Vogel", "emoji": "🐦" },
     { "title": "Frosch", "emoji": "🐸" },
     { "title": "Fledermaus", "emoji": "🦇" },
     { "title": "Marienkäfer", "emoji": "🐞" },
@@ -169,17 +169,16 @@
   ],
   "Körperteile (Emoji)": [
     { "title": "Hand", "emoji": "✋" },
-    { "title": "Kopf", "emoji": "💆" },
+    { "title": "Kopf", "emoji": "👤" },
     { "title": "Auge", "emoji": "👁️" },
     { "title": "Nase", "emoji": "👃" },
     { "title": "Bein", "emoji": "🦵" },
     { "title": "Arm", "emoji": "💪" },
-    { "title": "Bauch", "emoji": "🤰🏻" },
     { "title": "Daumen", "emoji": "👍" },
     { "title": "Fuß", "emoji": "🦶" },
-    { "title": "Haare", "emoji": "💇" },
+    { "title": "Haare", "emoji": "🦱" },
     { "title": "Zunge", "emoji": "👅" },
-    { "title": "Zähne", "emoji": "😁🦷" },
-    { "title": "Lippen", "emoji": "🫦" }
+    { "title": "Zähne", "emoji": "🦷" },
+    { "title": "Lippen", "emoji": "👄" }
   ]
 }
