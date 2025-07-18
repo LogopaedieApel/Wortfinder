@@ -504,7 +504,7 @@
                 el.textContent = word;
                 el.classList.add('rain-word');
 
-                const delay = Math.random() * 2.5;
+                const delay = Math.random() * 0.5;
                 const duration = 3 + Math.random() * 2;
                 const startX = Math.random() * 95;
                 const fontSize = 1 + Math.random() * 2;
@@ -528,7 +528,7 @@
 
             setTimeout(() => {
                 finalContent.style.display = 'flex';
-            }, 3000);
+            }, 1000);
         }
 
         initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
