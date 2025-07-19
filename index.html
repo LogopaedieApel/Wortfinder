@@ -43,8 +43,8 @@
         .settings-box h2 { margin-top: 0; margin-bottom: 15px; font-size: 1.2em; color: var(--primary-color); }
         .settings-group { margin-bottom: 20px; }
         .settings-group label { display: block; margin-bottom: 10px; font-weight: bold; }
-        .btn-group button { padding: 8px 12px; border: 1px solid var(--border-color); background-color: var(--button-bg); color: var(--text-color); cursor: pointer; transition: background-color 0.2s; }
-        .btn-group button:first-child { border-radius: 5px 0 0 5px; } .btn-group button:last-child { border-radius: 0 5px 5px 0; } .btn-group button:not(:last-child) { border-right: none; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 5px; } /* Flex-wrap hinzugefügt */
+        .btn-group button { padding: 8px 12px; border: 1px solid var(--border-color); background-color: var(--button-bg); color: var(--text-color); cursor: pointer; transition: background-color 0.2s; border-radius: 5px; } /* Radius für alle */
         .btn-group button:hover { background-color: var(--button-hover-bg); }
         .btn-group button.active { background-color: var(--active-bg); color: var(--active-text); font-weight: bold; }
         #conditional-settings .setting-block { display: none; } #conditional-settings .setting-block.active { display: block; }
@@ -60,21 +60,14 @@
         .btn-secondary { background-color: var(--button-bg); color: var(--text-color); }
         #error-message { color: var(--error-color); margin-top: 15px; font-weight: bold; display: none; }
         
-        #start-screen-logo {
-            position: absolute;
-            bottom: 100px;
-            right: 100px;
-            width: 100px;
-            height: 100px;
-            pointer-events: none;
-        }
+        #start-screen-logo { position: absolute; bottom: 100px; right: 100px; width: 100px; height: 100px; pointer-events: none; }
 
         /* Game-Screen */
         #game-screen { justify-content: flex-start; padding: 0; } 
         #game-hud { width: 100%; background-color: rgba(0,0,0,0.7); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; flex-shrink: 0; }
         #game-stats, #game-actions { display: flex; align-items: center; gap: 20px; } #game-stats span { font-size: 1.2em; }
         #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
-        #game-area { position: relative; width: 100%; flex: 1; overflow: hidden; }
+        #game-area { position: relative; width: 100%; flex: 1; overflow: hidden; padding: 10px; /* Padding für alle Modi */ }
         
         /* Wortwolke-Modus Stile */
         .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; transition: transform 0.2s, background-color 0.3s; }
@@ -83,79 +76,39 @@
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 
         /* Lesemodus Stile */
-        #game-area.reading-mode-active { display: flex; justify-content: center; align-items: center; padding: 10px; overflow: hidden; }
-        #reading-page-container {
-            width: 100%; height: 100%; background-color: var(--container-bg-color); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-radius: 10px;
-            overflow: hidden; display: grid; grid-template-rows: repeat(var(--grid-rows, 7), 1fr); grid-template-columns: repeat(var(--grid-cols, 10), 1fr); gap: 5px;
-        }
-        .reading-word {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.2s, color 0.2s;
-            user-select: none;
-            line-height: 1;
-            /* ===== KORREKTUR: Anwenden der lesefreundlichen Schriftart "Lexend" ===== */
-            font-family: 'Lexend', sans-serif;
-        }
+        #game-area.reading-mode-active { display: flex; justify-content: center; align-items: center; }
+        #reading-page-container { width: 100%; height: 100%; background-color: var(--container-bg-color); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; display: grid; grid-template-rows: repeat(var(--grid-rows, 7), 1fr); grid-template-columns: repeat(var(--grid-cols, 10), 1fr); gap: 5px; }
+        .reading-word { display: flex; justify-content: center; align-items: center; cursor: pointer; border-radius: 4px; transition: background-color 0.2s, color 0.2s; user-select: none; line-height: 1; font-family: 'Lexend', sans-serif; }
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
         
+        /* ===== START: NEUE STILE für Emoji-Quiz ===== */
+        .emoji-quiz-container { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; gap: 40px; }
+        .emoji-display { font-size: 10em; text-shadow: 0 5px 15px rgba(0,0,0,0.4); user-select: none; }
+        .choice-options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; }
+        .choice-btn { padding: 20px; font-size: 1.5em; background-color: var(--button-bg); color: var(--text-color); border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-family: 'Lexend', sans-serif; }
+        .choice-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); border-color: var(--primary-color); transform: translateY(-3px); }
+        .choice-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+        @media (max-width: 600px) {
+            .emoji-display { font-size: 8em; }
+            .choice-options { grid-template-columns: 1fr; gap: 15px; }
+            .choice-btn { font-size: 1.2em; padding: 15px; }
+        }
+        /* ===== ENDE: NEUE STILE für Emoji-Quiz ===== */
+
         /* Allgemeine Effekte & Animationen */
         .fade-out { animation: fade-out-anim 0.3s forwards; } @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
-        .correct { background-color: var(--success-color) !important; color: white !important; } 
-        .incorrect { background-color: var(--error-color) !important; color: white !important; }
+        .correct { background-color: var(--success-color) !important; color: white !important; border-color: var(--success-color) !important; } 
+        .incorrect { background-color: var(--error-color) !important; color: white !important; border-color: var(--error-color) !important; }
         .shake { animation: shake-anim 0.5s; } @keyframes shake-anim { 10%, 90% { transform: translateX(-3px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-3px); } 40%, 60% { transform: translateX(3px); } }
         
-        /* --- START: VERBESSERTE Game-Over Screen Stile --- */
-        #game-over-screen {
-            justify-content: flex-start;
-            overflow: hidden;
-        }
-        #game-over-animation-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5;
-        }
-        .rain-word {
-            position: absolute;
-            color: var(--primary-color);
-            font-weight: bold;
-            white-space: nowrap;
-            user-select: none;
-            pointer-events: none;
-            will-change: transform;
-            animation-name: word-rain-fall;
-            animation-timing-function: linear;
-            animation-fill-mode: forwards;
-            opacity: 0;
-        }
-
-        @keyframes word-rain-fall {
-            0% {
-                transform: translateY(-50vh) rotate(var(--start-rot));
-                opacity: 0;
-            }
-            5% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(110vh) rotate(var(--end-rot));
-                opacity: 1;
-            }
-        }
-        
-        #game-over-content {
-            display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-            width: 100%; height: 100%; z-index: 10;
-            animation: fadeInContent 1s ease-in forwards;
-        }
-        @keyframes fadeInContent {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        /* --- ENDE: VERBESSERTE Game-Over Screen Stile --- */
+        /* Game-Over Screen Stile */
+        #game-over-screen { justify-content: flex-start; overflow: hidden; }
+        #game-over-animation-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5; }
+        .rain-word { position: absolute; color: var(--primary-color); font-weight: bold; white-space: nowrap; user-select: none; pointer-events: none; will-change: transform; animation-name: word-rain-fall; animation-timing-function: linear; animation-fill-mode: forwards; opacity: 0; }
+        @keyframes word-rain-fall { 0% { transform: translateY(-50vh) rotate(var(--start-rot)); opacity: 0; } 5% { opacity: 1; } 100% { transform: translateY(110vh) rotate(var(--end-rot)); opacity: 1; } }
+        #game-over-content { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; z-index: 10; animation: fadeInContent 1s ease-in forwards; }
+        @keyframes fadeInContent { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -169,33 +122,27 @@
             </div>
             <div class="settings-box">
                 <h2>Einstellungen</h2>
-                <div class="settings-group"> <label>Spielmodus</label> <div class="btn-group"> <button id="mode-wordcloud" class="active">Wortwolke</button> <button id="mode-reading">Lesemodus</button> </div> </div>
                 <div class="settings-group">
-                    <label>Ton</label>
+                    <label>Spielmodus</label>
                     <div class="btn-group">
-                        <button id="sound-toggle-btn" class="active">An</button>
+                        <button id="mode-wordcloud" class="active">Wortwolke</button>
+                        <button id="mode-reading">Lesemodus</button>
+                        <!-- ===== NEUER BUTTON ===== -->
+                        <button id="mode-emoji-quiz">Emoji-Quiz</button>
                     </div>
                 </div>
-                <div id="conditional-settings"> <div id="wordcloud-settings" class="setting-block active">
-                    <div class="settings-group">
-                        <label for="target-frequency-slider">Zielwort-Häufigkeit</label>
-                        <div class="slider-container">
-                            <input type="range" id="target-frequency-slider" min="10" max="50" value="30" step="5">
-                            <span id="target-frequency-value" class="slider-value">30%</span>
-                        </div>
+                <div class="settings-group"> <label>Ton</label> <div class="btn-group"> <button id="sound-toggle-btn" class="active">An</button> </div> </div>
+                <div id="conditional-settings">
+                    <div id="wordcloud-settings" class="setting-block active">
+                        <div class="settings-group"> <label for="target-frequency-slider">Zielwort-Häufigkeit</label> <div class="slider-container"> <input type="range" id="target-frequency-slider" min="10" max="50" value="30" step="5"> <span id="target-frequency-value" class="slider-value">30%</span> </div> </div>
+                        <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div>
+                        <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div>
                     </div>
-                    <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div>
-                    <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div>
-                </div> <div id="reading-mode-settings" class="setting-block">
-                    <div class="settings-group">
-                        <label>Rastergröße (Dichte)</label>
-                        <div class="btn-group">
-                            <button id="grid-small">Klein (5x8)</button>
-                            <button id="grid-medium" class="active">Mittel (7x10)</button>
-                            <button id="grid-large">Groß (9x12)</button>
-                        </div>
+                    <div id="reading-mode-settings" class="setting-block">
+                        <div class="settings-group"> <label>Rastergröße (Dichte)</label> <div class="btn-group"> <button id="grid-small">Klein (5x8)</button> <button id="grid-medium" class="active">Mittel (7x10)</button> <button id="grid-large">Groß (9x12)</button> </div> </div>
                     </div>
-                </div> </div>
+                    <!-- Für Emoji-Quiz werden keine zusätzlichen Einstellungen benötigt -->
+                </div>
             </div>
             <div class="action-buttons"> <button id="start-game-btn" class="btn btn-primary">Spiel starten</button> <button id="fullscreen-btn" class="btn btn-secondary">Vollbild</button> </div>
             <p id="error-message"></p>
@@ -246,6 +193,7 @@
         const setup = {
             topicSelector: document.getElementById('topic-selector'), listSelector: document.getElementById('list-selector'),
             modeWordCloudBtn: document.getElementById('mode-wordcloud'), modeReadingBtn: document.getElementById('mode-reading'),
+            modeEmojiQuizBtn: document.getElementById('mode-emoji-quiz'), // ===== NEUER BUTTON-Verweis =====
             wordCloudSettings: document.getElementById('wordcloud-settings'), readingModeSettings: document.getElementById('reading-mode-settings'),
             startGameBtn: document.getElementById('start-game-btn'),
             errorMessage: document.getElementById('error-message'), baseSpeedSlider: document.getElementById('base-speed-slider'),
@@ -334,10 +282,7 @@
             source.start(0);
         }
 
-        function toggleSounds() {
-            soundsEnabled = !soundsEnabled;
-            updateSetupUI();
-        }
+        function toggleSounds() { soundsEnabled = !soundsEnabled; updateSetupUI(); }
         
         async function initializeApp() {
             await loadWordData();
@@ -348,6 +293,7 @@
             setup.topicSelector.addEventListener('change', updateListSelector);
             setup.modeWordCloudBtn.addEventListener('click', () => { state.gameMode = 'wordcloud'; updateSetupUI(); });
             setup.modeReadingBtn.addEventListener('click', () => { state.gameMode = 'reading'; updateSetupUI(); });
+            setup.modeEmojiQuizBtn.addEventListener('click', () => { state.gameMode = 'emojiQuiz'; updateSetupUI(); }); // ===== NEUER LISTENER =====
             setup.baseSpeedSlider.addEventListener('input', (e) => { state.baseAnimationSpeed = parseInt(e.target.value); updateSetupUI(); });
             setup.speedVarianceSlider.addEventListener('input', (e) => { state.speedVariance = parseInt(e.target.value); updateSetupUI(); });
             setup.targetFrequencySlider.addEventListener('input', (e) => { state.targetWordFrequency = parseInt(e.target.value); updateSetupUI(); });
@@ -360,22 +306,26 @@
             fullscreenBtns.forEach(btn => btn.addEventListener('click', toggleFullscreen));
             setup.soundToggleBtn.addEventListener('click', toggleSounds);
 
-            const repeatGameBtn = document.getElementById('repeat-game-btn');
-            const newSelectionBtn = document.getElementById('new-selection-btn');
-            repeatGameBtn.addEventListener('click', startGame); 
-            newSelectionBtn.addEventListener('click', () => showScreen('setup'));
+            document.getElementById('repeat-game-btn').addEventListener('click', startGame); 
+            document.getElementById('new-selection-btn').addEventListener('click', () => showScreen('setup'));
         }
         
         async function startGame() {
             await initAudio(); 
             const selectedTopic = setup.topicSelector.value;
             const selectedList = setup.listSelector.value;
+            
+            // ===== GEÄNDERTE PRÜFUNG: Emoji-Quiz braucht mindestens 4 Elemente für volle Funktionalität =====
             const wordList = WORD_DATA[selectedTopic][selectedList];
-            if (!wordList || wordList.length < 2) { 
-                setup.errorMessage.textContent = "Die Liste muss mindestens 2 verschiedene Elemente enthalten.";
+            const minWords = state.gameMode === 'emojiQuiz' ? 4 : 2;
+            const uniqueTitles = new Set(wordList.map(item => item.title)).size;
+
+            if (!wordList || uniqueTitles < minWords) { 
+                setup.errorMessage.textContent = `Für diesen Modus muss die Liste mindestens ${minWords} verschiedene Elemente enthalten.`;
                 setup.errorMessage.style.display = 'block';
                 return;
             }
+
             setup.errorMessage.style.display = 'none';
             state.wordList = [...wordList];
             state.level = 1;
@@ -395,175 +345,133 @@
             let availableWords = state.wordList.filter(w => !state.usedTargetWords.includes(w));
             state.targetWord = availableWords[Math.floor(Math.random() * availableWords.length)];
             state.usedTargetWords.push(state.targetWord);
-            state.hits = 0;
+            
             game.area.innerHTML = '';
             clearInterval(state.gameInterval);
             game.area.classList.remove('reading-mode-active');
+
+            // ===== NEUE WEICHE für Spielmodi =====
             if (state.gameMode === 'reading') {
                 game.area.classList.add('reading-mode-active');
                 startReadingMode();
+            } else if (state.gameMode === 'emojiQuiz') {
+                startEmojiQuizMode();
             } else {
                 startWordCloudMode();
             }
         }
         
+        // ===== ANGEPASSTE Funktion updateHUD =====
         function updateHUD() {
             game.levelDisplay.textContent = `Level: ${state.level} von ${state.wordList.length}`;
             game.hitsDisplay.textContent = `Treffer: ${state.hits} / ${state.hitsNeeded}`;
 
             let displayText;
-            if (state.targetWord.title === state.targetWord.emoji || !state.targetWord.title) {
+            // Im Emoji-Quiz soll das Ziel nur das Emoji sein, nicht der Titel
+            if (state.gameMode === 'emojiQuiz') {
                 displayText = state.targetWord.emoji;
             } else {
-                displayText = `${state.targetWord.title} ${state.targetWord.emoji}`;
+                if (state.targetWord.title === state.targetWord.emoji || !state.targetWord.title) {
+                    displayText = state.targetWord.emoji;
+                } else {
+                    displayText = `${state.targetWord.title} ${state.targetWord.emoji}`;
+                }
             }
             
-            game.targetWordDisplay.textContent = `Ziel: ${displayText}`;
+            // Im Emoji-Quiz passen wir den Text an
+            const labelText = state.gameMode === 'emojiQuiz' ? 'Welches Wort passt zu: ' : 'Ziel: ';
+            game.targetWordDisplay.textContent = labelText + displayText;
             game.targetWordDisplay.style.visibility = 'visible';
         }
 
-        function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
-        function spawnWordRain() { 
-            if (document.hidden) return;
-            const now = Date.now();
-            const freeLanes = []; 
-            for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); }
-            if (freeLanes.length === 0) return;
-            
-            let wordToSpawn; 
-            const probabilityThreshold = state.targetWordFrequency / 100;
-            if (Math.random() < probabilityThreshold) { 
-                wordToSpawn = state.targetWord; 
-            } else { 
-                const distractors = state.wordList.filter(w => w !== state.targetWord); 
-                wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;
-            } 
-            
-            const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)];
-            const el = document.createElement('div');
-            
-            el.textContent = wordToSpawn.emoji; 
-            
-            el.classList.add('game-word', 'word-fly-in');
-            const areaRect = game.area.getBoundingClientRect();
-            const laneHeight = areaRect.height / state.numLanes;
-            el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`;
-            const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100);
-            const randomDeviation = (Math.random() * 2 - 1) * varianceAmount;
-            const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation);
-            el.style.animationDuration = `${finalAnimationDuration}ms`;
-            el.addEventListener('pointerdown', handleWordCloudClick);
-            el.addEventListener('touchstart', handleWordCloudClick, { passive: true });
-            game.area.appendChild(el);
-            const wordWidth = el.offsetWidth;
-            const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000);
-            const clearanceTime = (wordWidth + 100) / pixelsPerSecond;
-            state.laneStates[laneIndex] = now + clearanceTime * 1000;
-            setTimeout(() => el.remove(), finalAnimationDuration);
-        }
-        
-        function handleWordCloudClick(e) {
-            if (state.levelWirdGewechselt) return;
+        // --- Logik für Wortwolke und Lesemodus (unverändert) ---
+        function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; state.hits = 0; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
+        function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;} const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn.emoji; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleWordCloudClick); el.addEventListener('touchstart', handleWordCloudClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
+        function handleWordCloudClick(e) { if (state.levelWirdGewechselt) return; const el = e.target; if (el.dataset.clicked) return; el.dataset.clicked = 'true'; el.style.transform = getComputedStyle(el).transform; el.style.animation = 'none'; el.style.pointerEvents = 'none'; if (el.textContent === state.targetWord.emoji) { playSound(clickSoundBuffer); state.hits++; el.classList.add('correct'); updateHUD(); if (state.hits >= state.hitsNeeded) { state.levelWirdGewechselt = true; playSound(completionSoundBuffer); clearInterval(state.gameInterval); setTimeout(() => { state.level++; startLevel(); }, 1000); } } else { el.classList.add('incorrect', 'shake'); } setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500); }
+        async function startReadingMode() { updateHUD(); await new Promise(resolve => setTimeout(resolve, 0)); const config = GRID_CONFIGS[state.readingGridSize]; const TOTAL_WORDS = config.total; const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17))); state.hitsNeeded = TARGET_COUNT; state.hits = 0; const distractors = state.wordList.filter(w => w !== state.targetWord); let wordsForPage = []; for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord.emoji); } for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)].emoji : state.targetWord.emoji); } shuffleArray(wordsForPage); const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, ""); const cellPadding = 10; const cellWidth = (game.area.clientWidth / config.cols) - cellPadding; const cellHeight = (game.area.clientHeight / config.rows) - cellPadding; const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight); const pageContainer = document.createElement('div'); pageContainer.id = 'reading-page-container'; pageContainer.style.setProperty('--grid-rows', config.rows); pageContainer.style.setProperty('--grid-cols', config.cols); wordsForPage.forEach(word => { const wordSpan = document.createElement('span'); wordSpan.textContent = word; wordSpan.classList.add('reading-word'); wordSpan.addEventListener('click', handleReadingWordClick); wordSpan.style.fontSize = `${optimalFontSize}px`; pageContainer.appendChild(wordSpan); }); game.area.appendChild(pageContainer); updateHUD(); }
+        function handleReadingWordClick(e) { if (state.levelWirdGewechselt) return; const el = e.target; if (el.classList.contains('correct')) return; if (el.textContent === state.targetWord.emoji) { playSound(clickSoundBuffer); el.classList.add('correct'); el.classList.remove('incorrect', 'shake'); state.hits++; updateHUD(); if (state.hits >= state.hitsNeeded) { state.levelWirdGewechselt = true; playSound(completionSoundBuffer); setTimeout(() => { state.level++; startLevel(); }, 1200); } } else { el.classList.add('incorrect', 'shake'); setTimeout(() => el.classList.remove('incorrect', 'shake'), 500); } }
 
-            const el = e.target;
-            if (el.dataset.clicked) return;
-            el.dataset.clicked = 'true';
-            el.style.transform = getComputedStyle(el).transform;
-            el.style.animation = 'none';
-            el.style.pointerEvents = 'none';
-            
-            if (el.textContent === state.targetWord.emoji) {
-                playSound(clickSoundBuffer);
-                state.hits++;
-                el.classList.add('correct');
-                updateHUD();
-                if (state.hits >= state.hitsNeeded) {
-                    state.levelWirdGewechselt = true;
-                    playSound(completionSoundBuffer);
-                    clearInterval(state.gameInterval);
-                    setTimeout(() => {
-                        state.level++;
-                        startLevel();
-                    }, 1000);
-                }
-            } else {
-                el.classList.add('incorrect', 'shake');
-            }
-            setTimeout(() => {
-                el.classList.add('fade-out');
-                setTimeout(() => el.remove(), 300);
-            }, 500);
-        }
-
-        async function startReadingMode() {
-            game.area.innerHTML = '';
+        // ===== START: NEUE FUNKTIONEN für Emoji-Quiz =====
+        function startEmojiQuizMode() {
+            state.hits = 0;
+            state.hitsNeeded = 1;
             updateHUD();
-            await new Promise(resolve => setTimeout(resolve, 0));
-            const config = GRID_CONFIGS[state.readingGridSize];
-            const TOTAL_WORDS = config.total;
-            const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17)));
-            state.hitsNeeded = TARGET_COUNT;
+
+            // 1. Störwörter (Distraktoren) finden
+            const distractors = new Set();
+            const potentialDistractors = state.wordList.filter(w => w.title !== state.targetWord.title);
+            shuffleArray(potentialDistractors); // Mischen für eine gute zufällige Auswahl
             
-            const distractors = state.wordList.filter(w => w !== state.targetWord); 
-            let wordsForPage = []; 
-            
-            for (let i = 0; i < TARGET_COUNT; i++) {
-                wordsForPage.push(state.targetWord.emoji);
-            }
-            for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) {
-                wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)].emoji : state.targetWord.emoji);
+            for(const item of potentialDistractors) {
+                if(distractors.size < 3) {
+                    distractors.add(item.title);
+                } else {
+                    break;
+                }
             }
             
-            shuffleArray(wordsForPage);
-            
-            const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, "");
-            const cellPadding = 10;
-            const cellWidth = (game.area.clientWidth / config.cols) - cellPadding;
-            const cellHeight = (game.area.clientHeight / config.rows) - cellPadding;
-            const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight);
-            
-            const pageContainer = document.createElement('div');
-            pageContainer.id = 'reading-page-container';
-            pageContainer.style.setProperty('--grid-rows', config.rows);
-            pageContainer.style.setProperty('--grid-cols', config.cols);
-            
-            wordsForPage.forEach(word => {
-                const wordSpan = document.createElement('span');
-                wordSpan.textContent = word;
-                wordSpan.classList.add('reading-word');
-                wordSpan.addEventListener('click', handleReadingWordClick);
-                wordSpan.style.fontSize = `${optimalFontSize}px`;
-                pageContainer.appendChild(wordSpan);
+            // 2. Antwortmöglichkeiten erstellen und mischen
+            const choices = [state.targetWord.title, ...Array.from(distractors)];
+            shuffleArray(choices);
+
+            // 3. HTML-Struktur für das Quiz aufbauen
+            const container = document.createElement('div');
+            container.className = 'emoji-quiz-container';
+
+            const emojiDisplay = document.createElement('div');
+            emojiDisplay.className = 'emoji-display';
+            emojiDisplay.textContent = state.targetWord.emoji;
+
+            const optionsContainer = document.createElement('div');
+            optionsContainer.className = 'choice-options';
+
+            choices.forEach(choiceText => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choiceText;
+                btn.addEventListener('click', handleEmojiQuizChoice);
+                optionsContainer.appendChild(btn);
             });
-            game.area.appendChild(pageContainer);
-            updateHUD();
+
+            container.appendChild(emojiDisplay);
+            container.appendChild(optionsContainer);
+            game.area.appendChild(container);
         }
-        
-        function handleReadingWordClick(e) {
+
+        function handleEmojiQuizChoice(e) {
             if (state.levelWirdGewechselt) return;
 
-            const el = e.target;
-            if (el.classList.contains('correct')) return;
-            
-            if (el.textContent === state.targetWord.emoji) {
-                playSound(clickSoundBuffer);
-                el.classList.add('correct');
-                el.classList.remove('incorrect', 'shake');
+            const clickedButton = e.target;
+            const isCorrect = clickedButton.textContent === state.targetWord.title;
+
+            if (isCorrect) {
+                state.levelWirdGewechselt = true;
+                
+                // Alle Buttons deaktivieren, um weitere Klicks zu verhindern
+                const allButtons = game.area.querySelectorAll('.choice-btn');
+                allButtons.forEach(btn => btn.disabled = true);
+                
+                clickedButton.classList.add('correct');
+                playSound(completionSoundBuffer);
                 state.hits++;
-                updateHUD();
-                if (state.hits >= state.hitsNeeded) {
-                    state.levelWirdGewechselt = true;
-                    playSound(completionSoundBuffer);
-                    setTimeout(() => {
-                        state.level++;
-                        startLevel();
-                    }, 1200);
-                }
+                updateHUD(); // Zeigt kurz "1 / 1"
+
+                setTimeout(() => {
+                    state.level++;
+                    startLevel();
+                }, 1500);
+
             } else {
-                el.classList.add('incorrect', 'shake');
-                setTimeout(() => el.classList.remove('incorrect', 'shake'), 500);
+                clickedButton.disabled = true; // Falschen Button kurz deaktivieren
+                clickedButton.classList.add('incorrect', 'shake');
+                playSound(clickSoundBuffer);
+                setTimeout(() => {
+                    clickedButton.classList.remove('incorrect', 'shake');
+                    clickedButton.disabled = false; // Wieder aktivierbar machen
+                }, 600);
             }
         }
+        // ===== ENDE: NEUE FUNKTIONEN für Emoji-Quiz =====
 
         function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } return array; }
         function calculateOptimalFontSize(text, maxWidth, maxHeight) { const meter = document.createElement('span'); meter.classList.add('reading-word'); meter.style.position = 'absolute'; meter.style.visibility = 'hidden'; meter.style.whiteSpace = 'nowrap'; meter.textContent = text; document.body.appendChild(meter); let fontSize = 100; meter.style.fontSize = `${fontSize}px`; while ((meter.offsetWidth > maxWidth || meter.offsetHeight > maxHeight) && fontSize > 8) { fontSize--; meter.style.fontSize = `${fontSize}px`; } document.body.removeChild(meter); return Math.max(fontSize * 0.9, 8); }
@@ -573,9 +481,7 @@
                 const fetchPromises = Object.entries(TOPICS_TO_LOAD).map(async ([topicName, fileName]) => {
                     const response = await fetch(fileName);
                     if (!response.ok) throw new Error(`${fileName}: ${response.statusText}`);
-                    
                     let topicData = await response.json();
-
                     for (const listName in topicData) {
                         const list = topicData[listName];
                         if (Array.isArray(list) && list.length > 0 && typeof list[0] === 'string') {
@@ -599,7 +505,26 @@
         function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; if(!WORD_DATA[selectedTopic]) return; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
         function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
-        function updateSetupUI() { setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading'); setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; }
+        
+        // ===== ANGEPASSTE Funktion updateSetupUI =====
+        function updateSetupUI() { 
+            setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); 
+            setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
+            setup.modeEmojiQuizBtn.classList.toggle('active', state.gameMode === 'emojiQuiz'); // NEU
+
+            setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); 
+            setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); 
+            
+            setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; 
+            setup.speedVarianceSlider.value = state.speedVariance; setup.speedVarianceValue.textContent = `±${state.speedVariance}%`; 
+            setup.targetFrequencySlider.value = state.targetWordFrequency; setup.targetFrequencyValue.textContent = `${state.targetWordFrequency}%`; 
+            
+            setup.gridSmallBtn.classList.toggle('active', state.readingGridSize === 'small'); 
+            setup.gridMediumBtn.classList.toggle('active', state.readingGridSize === 'medium'); 
+            setup.gridLargeBtn.classList.toggle('active', state.readingGridSize === 'large'); 
+            
+            setup.soundToggleBtn.classList.toggle('active', soundsEnabled); setup.soundToggleBtn.textContent = soundsEnabled ? 'An' : 'Aus'; 
+        }
         
         function endGame() {
             clearInterval(state.gameInterval);
@@ -608,58 +533,21 @@
 
             const container = document.getElementById('game-over-animation-container');
             const finalContent = document.getElementById('game-over-content');
-            
             container.innerHTML = '';
             finalContent.style.display = 'none';
 
-            const MIN_RAIN_ITEMS = 40;
-            const MAX_RAIN_ITEMS = 70;
+            const MIN_RAIN_ITEMS = 40; const MAX_RAIN_ITEMS = 70;
             let wordsToAnimate = [];
-
-            if (state.wordList.length === 0) {
-                finalContent.style.display = 'flex';
-                return;
-            }
-
-            if (state.wordList.length < MIN_RAIN_ITEMS) {
-                for (let i = 0; i < MIN_RAIN_ITEMS; i++) {
-                    const randomWord = state.wordList[Math.floor(Math.random() * state.wordList.length)];
-                    wordsToAnimate.push(randomWord);
-                }
-            } else {
-                wordsToAnimate = shuffleArray([...state.wordList]).slice(0, MAX_RAIN_ITEMS);
-            }
-            
+            if (state.wordList.length === 0) { finalContent.style.display = 'flex'; return; }
+            if (state.wordList.length < MIN_RAIN_ITEMS) { for (let i = 0; i < MIN_RAIN_ITEMS; i++) { const randomWord = state.wordList[Math.floor(Math.random() * state.wordList.length)]; wordsToAnimate.push(randomWord); } } else { wordsToAnimate = shuffleArray([...state.wordList]).slice(0, MAX_RAIN_ITEMS); }
             wordsToAnimate.forEach(word => {
-                const el = document.createElement('span');
-                el.textContent = word.emoji;
-                el.classList.add('rain-word');
-
-                const delay = Math.random() * 0.5;
-                const duration = 3 + Math.random() * 2;
-                const startX = Math.random() * 95;
-                const fontSize = 1 + Math.random() * 2;
-                const startRotation = -60 + Math.random() * 120;
-                const endRotation = startRotation + (-360 + Math.random() * 720);
-
-                el.style.setProperty('--start-rot', `${startRotation}deg`);
-                el.style.setProperty('--end-rot', `${endRotation}deg`);
-                
-                el.style.left = `${startX}vw`;
-                el.style.fontSize = `${fontSize}em`;
-                el.style.animationDelay = `${delay}s`;
-                el.style.animationDuration = `${duration}s`;
-                
+                const el = document.createElement('span'); el.textContent = word.emoji; el.classList.add('rain-word');
+                const delay = Math.random() * 0.5; const duration = 3 + Math.random() * 2; const startX = Math.random() * 95; const fontSize = 1 + Math.random() * 2; const startRotation = -60 + Math.random() * 120; const endRotation = startRotation + (-360 + Math.random() * 720);
+                el.style.setProperty('--start-rot', `${startRotation}deg`); el.style.setProperty('--end-rot', `${endRotation}deg`); el.style.left = `${startX}vw`; el.style.fontSize = `${fontSize}em`; el.style.animationDelay = `${delay}s`; el.style.animationDuration = `${duration}s`;
                 container.appendChild(el);
-
-                setTimeout(() => {
-                    if (el) el.remove();
-                }, (delay + duration) * 1000 + 200);
+                setTimeout(() => { if (el) el.remove(); }, (delay + duration) * 1000 + 200);
             });
-
-            setTimeout(() => {
-                finalContent.style.display = 'flex';
-            }, 1000);
+            setTimeout(() => { finalContent.style.display = 'flex'; }, 1000);
         }
 
         initializeApp().catch(error => console.error("Initialisierung fehlgeschlagen."));
