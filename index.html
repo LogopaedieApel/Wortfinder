@@ -69,7 +69,18 @@
         #game-area { position: relative; width: 100%; flex: 1; overflow: hidden; padding: 10px; }
         
         /* Flugmodus Stile */
-        .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; transition: transform 0.2s, background-color 0.3s; }
+        .game-word {
+            position: absolute;
+            padding: 8px 15px;
+            background-color: rgba(43, 43, 43, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 2em;
+            transition: transform 0.2s, background-color 0.3s;
+            font-family: 'Lexend', sans-serif; /* KORREKTUR: Fehlende Schriftart hinzugefügt */
+        }
         .game-word:hover { transform: scale(1.1); border-color: var(--primary-color); }
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
         @keyframes fly-across { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
@@ -81,13 +92,13 @@
         .reading-word:hover { background-color: var(--button-hover-bg); }
         .reading-word.correct { background-color: var(--success-color) !important; color: white !important; cursor: default; }
         
-        /* ===== KORRIGIERTE Emoji-Quiz Stile ===== */
+        /* Emoji-Quiz Stile */
         .emoji-quiz-container { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; gap: 40px; }
         .emoji-display {
             font-size: 10em;
             text-shadow: 0 5px 15px rgba(0,0,0,0.4);
             user-select: none;
-            font-family: 'Lexend', sans-serif; /* KORREKTUR: Schriftart hinzugefügt */
+            font-family: 'Lexend', sans-serif;
         }
         .choice-options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px; }
         .choice-btn {
@@ -99,7 +110,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-family: 'Lexend', sans-serif; /* Schriftart ist hier korrekt */
+            font-family: 'Lexend', sans-serif;
         }
         .choice-btn:hover:not(:disabled) { background-color: var(--button-hover-bg); border-color: var(--primary-color); transform: translateY(-3px); }
         .choice-btn:disabled { cursor: not-allowed; opacity: 0.7; }
@@ -108,8 +119,7 @@
             .choice-options { grid-template-columns: 1fr; gap: 15px; }
             .choice-btn { font-size: 1.2em; padding: 15px; }
         }
-        /* ===== ENDE der korrigierten Stile ===== */
-
+        
         /* Allgemeine Effekte & Animationen */
         .fade-out { animation: fade-out-anim 0.3s forwards; } @keyframes fade-out-anim { to { opacity: 0; transform: scale(0.5); } }
         .correct { background-color: var(--success-color) !important; color: white !important; border-color: var(--success-color) !important; } 
