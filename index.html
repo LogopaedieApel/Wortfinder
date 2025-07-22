@@ -35,8 +35,36 @@
         
         /* Setup-Screen */
         #setup-screen .container { background-color: var(--container-bg-color); padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); max-width: 600px; width: 100%; }
-        .selector-group { display: flex; gap: 15px; margin-bottom: 20px; }
+        .selector-group { display: flex; gap: 15px; margin-bottom: 20px; align-items: start; }
         .selector-group > div { flex: 1; }
+        
+        /* NEUE Stile für den Listen-Kombinierer */
+        #list-selector-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        #add-list-btn {
+            padding: 5px 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        #add-list-btn:hover:not(:disabled) {
+            background-color: var(--button-hover-bg);
+        }
+        #add-list-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         select { width: 100%; padding: 10px; font-size: 1em; background-color: #1e1e1e; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; }
         .settings-box { border: 1px solid var(--border-color); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .settings-box h2 { margin-top: 0; margin-bottom: 15px; font-size: 1.2em; color: var(--primary-color); }
@@ -131,8 +159,17 @@
         <div class="container">
             <h1 id="main-title">Wortfinder: Setup</h1>
             <div class="selector-group">
-                <div> <label for="topic-selector">Thema</label> <select id="topic-selector"></select> </div>
-                <div> <label for="list-selector">Liste</label> <select id="list-selector"></select> </div>
+                <div> 
+                    <label for="topic-selector">Thema</label> 
+                    <select id="topic-selector"></select> 
+                </div>
+                <div> 
+                    <label>Liste(n)</label>
+                    <div id="list-selector-container">
+                        <!-- Select-Elemente werden hier von JavaScript eingefügt -->
+                    </div>
+                    <button id="add-list-btn" title="Weitere Liste hinzufügen">+</button>
+                </div>
             </div>
             <div class="settings-box">
                 <h2>Einstellungen</h2>
@@ -198,6 +235,8 @@
             "Lesen einfache Wörter": "lesen_einfache_woerter.json"
         };
         
+        const MAX_COMBINED_LISTS = 4;
+        
         const GRID_CONFIGS = {
             small:  { rows: 5, cols: 8,  total: 40 },
             medium: { rows: 7, cols: 10, total: 70 },
@@ -206,7 +245,9 @@
 
         const screens = { setup: document.getElementById('setup-screen'), game: document.getElementById('game-screen'), gameOver: document.getElementById('game-over-screen') };
         const setup = {
-            topicSelector: document.getElementById('topic-selector'), listSelector: document.getElementById('list-selector'),
+            topicSelector: document.getElementById('topic-selector'), 
+            listSelectorContainer: document.getElementById('list-selector-container'),
+            addListBtn: document.getElementById('add-list-btn'),
             modeWordCloudBtn: document.getElementById('mode-wordcloud'), modeReadingBtn: document.getElementById('mode-reading'),
             modeEmojiQuizBtn: document.getElementById('mode-emoji-quiz'),
             wordCloudSettings: document.getElementById('wordcloud-settings'), readingModeSettings: document.getElementById('reading-mode-settings'),
@@ -302,10 +343,11 @@
         async function initializeApp() {
             await loadWordData();
             populateTopicSelector();
-            updateListSelector();
+            resetAndPopulateListSelectors();
             updateSetupUI();
             
-            setup.topicSelector.addEventListener('change', updateListSelector);
+            setup.topicSelector.addEventListener('change', resetAndPopulateListSelectors);
+            setup.addListBtn.addEventListener('click', addListSelector);
             setup.modeWordCloudBtn.addEventListener('click', () => { state.gameMode = 'wordcloud'; updateSetupUI(); });
             setup.modeReadingBtn.addEventListener('click', () => { state.gameMode = 'reading'; updateSetupUI(); });
             setup.modeEmojiQuizBtn.addEventListener('click', () => { state.gameMode = 'emojiQuiz'; updateSetupUI(); });
@@ -328,20 +370,33 @@
         async function startGame() {
             await initAudio(); 
             const selectedTopic = setup.topicSelector.value;
-            const selectedList = setup.listSelector.value;
             
-            const wordList = WORD_DATA[selectedTopic][selectedList];
-            const minWords = state.gameMode === 'emojiQuiz' ? 4 : 2;
-            const uniqueTitles = new Set(wordList.map(item => item.title)).size;
+            const selectedLists = Array.from(setup.listSelectorContainer.querySelectorAll('select'))
+                                       .map(sel => sel.value);
 
-            if (!wordList || uniqueTitles < minWords) { 
-                setup.errorMessage.textContent = `Für diesen Modus muss die Liste mindestens ${minWords} verschiedene Elemente enthalten.`;
+            const uniqueWordsMap = new Map();
+            selectedLists.forEach(listName => {
+                if(WORD_DATA[selectedTopic] && WORD_DATA[selectedTopic][listName]) {
+                    const words = WORD_DATA[selectedTopic][listName];
+                    words.forEach(word => {
+                        if (!uniqueWordsMap.has(word.title)) {
+                            uniqueWordsMap.set(word.title, word);
+                        }
+                    });
+                }
+            });
+            const combinedWordList = Array.from(uniqueWordsMap.values());
+            
+            const minWords = state.gameMode === 'emojiQuiz' ? 4 : 2;
+
+            if (!combinedWordList.length || combinedWordList.length < minWords) { 
+                setup.errorMessage.textContent = `Für diesen Modus müssen die kombinierten Listen mindestens ${minWords} verschiedene Elemente enthalten.`;
                 setup.errorMessage.style.display = 'block';
                 return;
             }
 
             setup.errorMessage.style.display = 'none';
-            state.wordList = [...wordList];
+            state.wordList = combinedWordList;
             state.level = 1;
             state.hits = 0;
             state.usedTargetWords = [];
@@ -500,7 +555,53 @@
         }
 
         function populateTopicSelector() { setup.topicSelector.innerHTML = ''; Object.keys(WORD_DATA).forEach(topicName => { const option = document.createElement('option'); option.value = topicName; option.textContent = topicName; setup.topicSelector.appendChild(option); }); }
-        function updateListSelector() { const selectedTopic = setup.topicSelector.value; setup.listSelector.innerHTML = ''; if(!WORD_DATA[selectedTopic]) return; const listsForTopic = WORD_DATA[selectedTopic]; Object.keys(listsForTopic).forEach(listName => { const option = document.createElement('option'); option.value = listName; option.textContent = listName; setup.listSelector.appendChild(option); }); }
+        
+        function resetAndPopulateListSelectors() {
+            setup.listSelectorContainer.innerHTML = '';
+            addListSelector();
+        }
+
+        function addListSelector() {
+            const currentSelectors = setup.listSelectorContainer.querySelectorAll('select');
+            if (currentSelectors.length >= MAX_COMBINED_LISTS) {
+                return;
+            }
+
+            const newSelect = document.createElement('select');
+            newSelect.addEventListener('change', updateAddButtonAndOptions);
+            setup.listSelectorContainer.appendChild(newSelect);
+            
+            updateAddButtonAndOptions();
+        }
+
+        function updateAddButtonAndOptions() {
+            const currentSelectors = Array.from(setup.listSelectorContainer.querySelectorAll('select'));
+            const selectedValues = currentSelectors.map(s => s.value);
+            const selectedTopic = setup.topicSelector.value;
+            const allListsForTopic = (WORD_DATA[selectedTopic] && Object.keys(WORD_DATA[selectedTopic])) || [];
+
+            currentSelectors.forEach(selectElement => {
+                const currentValue = selectElement.value;
+                const otherSelectedValues = selectedValues.filter(v => v !== currentValue);
+                const availableLists = allListsForTopic.filter(list => !otherSelectedValues.includes(list));
+                
+                selectElement.innerHTML = '';
+                availableLists.forEach(listName => {
+                    const option = document.createElement('option');
+                    option.value = listName;
+                    option.textContent = listName;
+                    selectElement.appendChild(option);
+                });
+
+                if (availableLists.includes(currentValue)) {
+                    selectElement.value = currentValue;
+                }
+            });
+            
+            const canAddMore = currentSelectors.length < MAX_COMBINED_LISTS && currentSelectors.length < allListsForTopic.length;
+            setup.addListBtn.disabled = !canAddMore;
+        }
+
         function showScreen(screenName) { Object.values(screens).forEach(s => s.classList.remove('active')); screens[screenName].classList.add('active'); }
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
         
