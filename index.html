@@ -126,7 +126,7 @@
         #target-word-display { font-size: 1.5em; font-weight: bold; color: var(--primary-color); text-align: center; visibility: hidden; }
         #game-area { position: relative; width: 100%; flex: 1; overflow: hidden; padding: 10px; }
         
-        /* Wortwolke-Modus Stile */
+        /* Flugmodus Stile */
         .game-word { position: absolute; padding: 8px 15px; background-color: rgba(43, 43, 43, 0.9); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; user-select: none; font-size: 2em; transition: transform 0.2s, background-color 0.3s; }
         .game-word:hover { transform: scale(1.1); border-color: var(--primary-color); }
         .word-fly-in { left: 0; animation-name: fly-across; animation-timing-function: linear; white-space: nowrap; }
@@ -192,14 +192,14 @@
                 <div class="settings-group">
                     <label>Spielmodus</label>
                     <div class="btn-group">
-                        <button id="mode-wordcloud" class="active">Wortwolke</button>
+                        <button id="mode-flight" class="active">Flugmodus</button>
                         <button id="mode-reading">Lesemodus</button>
                         <button id="mode-emoji-quiz">Emoji-Quiz</button>
                     </div>
                 </div>
                 <div class="settings-group"> <label>Ton</label> <div class="btn-group"> <button id="sound-toggle-btn" class="active">An</button> </div> </div>
                 <div id="conditional-settings">
-                    <div id="wordcloud-settings" class="setting-block active">
+                    <div id="flight-mode-settings" class="setting-block active">
                         <div class="settings-group"> <label for="target-frequency-slider">Zielwort-Häufigkeit</label> <div class="slider-container"> <input type="range" id="target-frequency-slider" min="10" max="50" value="30" step="5"> <span id="target-frequency-value" class="slider-value">30%</span> </div> </div>
                         <div class="settings-group"> <label for="base-speed-slider">Grundgeschwindigkeit</label> <div class="slider-container"><input type="range" id="base-speed-slider" min="5000" max="20000" value="10000" step="500"><span id="base-speed-value" class="slider-value">10.0s</span></div> </div>
                         <div class="settings-group"> <label for="speed-variance-slider">Tempo-Varianz</label> <div class="slider-container"><input type="range" id="speed-variance-slider" min="0" max="50" value="20" step="5"><span id="speed-variance-value" class="slider-value">±20%</span></div> </div>
@@ -264,9 +264,9 @@
             topicSelector: document.getElementById('topic-selector'), 
             listSelectorContainer: document.getElementById('list-selector-container'),
             addListBtn: document.getElementById('add-list-btn'),
-            modeWordCloudBtn: document.getElementById('mode-wordcloud'), modeReadingBtn: document.getElementById('mode-reading'),
+            modeFlightBtn: document.getElementById('mode-flight'), modeReadingBtn: document.getElementById('mode-reading'),
             modeEmojiQuizBtn: document.getElementById('mode-emoji-quiz'),
-            wordCloudSettings: document.getElementById('wordcloud-settings'), readingModeSettings: document.getElementById('reading-mode-settings'),
+            flightModeSettings: document.getElementById('flight-mode-settings'), readingModeSettings: document.getElementById('reading-mode-settings'),
             startGameBtn: document.getElementById('start-game-btn'),
             errorMessage: document.getElementById('error-message'), baseSpeedSlider: document.getElementById('base-speed-slider'),
             baseSpeedValue: document.getElementById('base-speed-value'), speedVarianceSlider: document.getElementById('speed-variance-slider'),
@@ -282,7 +282,7 @@
         
         const fullscreenBtns = [document.getElementById('fullscreen-btn'), document.getElementById('fullscreen-btn-game')];
         let state = {
-            gameMode: 'wordcloud', numLanes: 7, laneStates: [], baseAnimationSpeed: 10000,
+            gameMode: 'flight', numLanes: 7, laneStates: [], baseAnimationSpeed: 10000,
             speedVariance: 20, targetWordFrequency: 30,
             readingGridSize: 'medium', 
             wordList: [], usedTargetWords: [], targetWord: null, level: 1, hits: 0, hitsNeeded: 10, gameInterval: null,
@@ -364,7 +364,7 @@
             
             setup.topicSelector.addEventListener('change', resetAndPopulateListSelectors);
             setup.addListBtn.addEventListener('click', addListSelector);
-            setup.modeWordCloudBtn.addEventListener('click', () => { state.gameMode = 'wordcloud'; updateSetupUI(); });
+            setup.modeFlightBtn.addEventListener('click', () => { state.gameMode = 'flight'; updateSetupUI(); });
             setup.modeReadingBtn.addEventListener('click', () => { state.gameMode = 'reading'; updateSetupUI(); });
             setup.modeEmojiQuizBtn.addEventListener('click', () => { state.gameMode = 'emojiQuiz'; updateSetupUI(); });
             setup.baseSpeedSlider.addEventListener('input', (e) => { state.baseAnimationSpeed = parseInt(e.target.value); updateSetupUI(); });
@@ -441,7 +441,7 @@
             } else if (state.gameMode === 'emojiQuiz') {
                 startEmojiQuizMode();
             } else {
-                startWordCloudMode();
+                startFlightMode();
             }
         }
         
@@ -465,9 +465,9 @@
             game.targetWordDisplay.style.visibility = 'visible';
         }
 
-        function startWordCloudMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; state.hits = 0; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
-        function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;} const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn.emoji; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleWordCloudClick); el.addEventListener('touchstart', handleWordCloudClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
-        function handleWordCloudClick(e) { if (state.levelWirdGewechselt) return; const el = e.target; if (el.dataset.clicked) return; el.dataset.clicked = 'true'; el.style.transform = getComputedStyle(el).transform; el.style.animation = 'none'; el.style.pointerEvents = 'none'; if (el.textContent === state.targetWord.emoji) { playSound(clickSoundBuffer); state.hits++; el.classList.add('correct'); updateHUD(); if (state.hits >= state.hitsNeeded) { state.levelWirdGewechselt = true; playSound(completionSoundBuffer); clearInterval(state.gameInterval); setTimeout(() => { state.level++; startLevel(); }, 1000); } } else { el.classList.add('incorrect', 'shake'); } setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500); }
+        function startFlightMode() { state.laneStates = Array(state.numLanes).fill(0); state.hitsNeeded = 10; state.hits = 0; updateHUD(); state.gameInterval = setInterval(spawnWordRain, 350); }
+        function spawnWordRain() { if (document.hidden) return; const now = Date.now(); const freeLanes = []; for (let i = 0; i < state.numLanes; i++) { if (state.laneStates[i] < now) freeLanes.push(i); } if (freeLanes.length === 0) return; let wordToSpawn; const probabilityThreshold = state.targetWordFrequency / 100; if (Math.random() < probabilityThreshold) { wordToSpawn = state.targetWord; } else { const distractors = state.wordList.filter(w => w !== state.targetWord); wordToSpawn = distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)] : state.targetWord;} const laneIndex = freeLanes[Math.floor(Math.random() * freeLanes.length)]; const el = document.createElement('div'); el.textContent = wordToSpawn.emoji; el.classList.add('game-word', 'word-fly-in'); const areaRect = game.area.getBoundingClientRect(); const laneHeight = areaRect.height / state.numLanes; el.style.top = `${laneIndex * laneHeight + Math.random() * (laneHeight - 40)}px`; const varianceAmount = state.baseAnimationSpeed * (state.speedVariance / 100); const randomDeviation = (Math.random() * 2 - 1) * varianceAmount; const finalAnimationDuration = Math.max(2000, state.baseAnimationSpeed + randomDeviation); el.style.animationDuration = `${finalAnimationDuration}ms`; el.addEventListener('pointerdown', handleFlightModeClick); el.addEventListener('touchstart', handleFlightModeClick, { passive: true }); game.area.appendChild(el); const wordWidth = el.offsetWidth; const pixelsPerSecond = (areaRect.width + wordWidth) / (finalAnimationDuration / 1000); const clearanceTime = (wordWidth + 100) / pixelsPerSecond; state.laneStates[laneIndex] = now + clearanceTime * 1000; setTimeout(() => el.remove(), finalAnimationDuration); }
+        function handleFlightModeClick(e) { if (state.levelWirdGewechselt) return; const el = e.target; if (el.dataset.clicked) return; el.dataset.clicked = 'true'; el.style.transform = getComputedStyle(el).transform; el.style.animation = 'none'; el.style.pointerEvents = 'none'; if (el.textContent === state.targetWord.emoji) { playSound(clickSoundBuffer); state.hits++; el.classList.add('correct'); updateHUD(); if (state.hits >= state.hitsNeeded) { state.levelWirdGewechselt = true; playSound(completionSoundBuffer); clearInterval(state.gameInterval); setTimeout(() => { state.level++; startLevel(); }, 1000); } } else { el.classList.add('incorrect', 'shake'); } setTimeout(() => { el.classList.add('fade-out'); setTimeout(() => el.remove(), 300); }, 500); }
         async function startReadingMode() { updateHUD(); await new Promise(resolve => setTimeout(resolve, 0)); const config = GRID_CONFIGS[state.readingGridSize]; const TOTAL_WORDS = config.total; const TARGET_COUNT = Math.min(25, Math.max(5, Math.round(TOTAL_WORDS * 0.17))); state.hitsNeeded = TARGET_COUNT; state.hits = 0; const distractors = state.wordList.filter(w => w !== state.targetWord); let wordsForPage = []; for (let i = 0; i < TARGET_COUNT; i++) { wordsForPage.push(state.targetWord.emoji); } for (let i = 0; i < TOTAL_WORDS - TARGET_COUNT; i++) { wordsForPage.push(distractors.length > 0 ? distractors[Math.floor(Math.random() * distractors.length)].emoji : state.targetWord.emoji); } shuffleArray(wordsForPage); const longestWord = wordsForPage.reduce((a, b) => a.length > b.length ? a : b, ""); const cellPadding = 10; const cellWidth = (game.area.clientWidth / config.cols) - cellPadding; const cellHeight = (game.area.clientHeight / config.rows) - cellPadding; const optimalFontSize = calculateOptimalFontSize(longestWord, cellWidth, cellHeight); const pageContainer = document.createElement('div'); pageContainer.id = 'reading-page-container'; pageContainer.style.setProperty('--grid-rows', config.rows); pageContainer.style.setProperty('--grid-cols', config.cols); wordsForPage.forEach(word => { const wordSpan = document.createElement('span'); wordSpan.textContent = word; wordSpan.classList.add('reading-word'); wordSpan.addEventListener('click', handleReadingWordClick); wordSpan.style.fontSize = `${optimalFontSize}px`; pageContainer.appendChild(wordSpan); }); game.area.appendChild(pageContainer); updateHUD(); }
         function handleReadingWordClick(e) { if (state.levelWirdGewechselt) return; const el = e.target; if (el.classList.contains('correct')) return; if (el.textContent === state.targetWord.emoji) { playSound(clickSoundBuffer); el.classList.add('correct'); el.classList.remove('incorrect', 'shake'); state.hits++; updateHUD(); if (state.hits >= state.hitsNeeded) { state.levelWirdGewechselt = true; playSound(completionSoundBuffer); setTimeout(() => { state.level++; startLevel(); }, 1200); } } else { el.classList.add('incorrect', 'shake'); setTimeout(() => el.classList.remove('incorrect', 'shake'), 500); } }
 
@@ -647,11 +647,11 @@
         function toggleFullscreen() { if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => console.warn(`Vollbildfehler: ${err.message}`)); } else if (document.exitFullscreen) { document.exitFullscreen(); } }
         
         function updateSetupUI() { 
-            setup.modeWordCloudBtn.classList.toggle('active', state.gameMode === 'wordcloud'); 
+            setup.modeFlightBtn.classList.toggle('active', state.gameMode === 'flight'); 
             setup.modeReadingBtn.classList.toggle('active', state.gameMode === 'reading');
             setup.modeEmojiQuizBtn.classList.toggle('active', state.gameMode === 'emojiQuiz');
 
-            setup.wordCloudSettings.classList.toggle('active', state.gameMode === 'wordcloud'); 
+            setup.flightModeSettings.classList.toggle('active', state.gameMode === 'flight'); 
             setup.readingModeSettings.classList.toggle('active', state.gameMode === 'reading'); 
             
             setup.baseSpeedSlider.value = state.baseAnimationSpeed; setup.baseSpeedValue.textContent = (state.baseAnimationSpeed / 1000).toFixed(1) + 's'; 
