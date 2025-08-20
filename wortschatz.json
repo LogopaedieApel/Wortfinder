@@ -210,5 +210,87 @@
     { "title": "reich", "emoji": "🤑💰" },
     { "title": "traurig", "emoji": "😢😭" },
     { "title": "fröhlich", "emoji": "😃🥳" }
+  ],
+  "Essen & Trinken (Emoji)": [
+    { "title": "Brot", "emoji": "🍞" },
+    { "title": "Käse", "emoji": "🧀" },
+    { "title": "Ei", "emoji": "🥚" },
+    { "title": "Milch", "emoji": "🥛" },
+    { "title": "Kuchen", "emoji": "🍰" },
+    { "title": "Pizza", "emoji": "🍕" },
+    { "title": "Eis", "emoji": "🍦" },
+    { "title": "Wasser", "emoji": "💧" },
+    { "title": "Saft", "emoji": "🧃" },
+    { "title": "Nudeln", "emoji": "🍝" }
+  ],
+  "Möbel & Haushalt (Emoji)": [
+    { "title": "Tisch", "emoji": "🪑" },
+    { "title": "Stuhl", "emoji": "🪑" },
+    { "title": "Bett", "emoji": "🛏️" },
+    { "title": "Sofa", "emoji": "🛋️" },
+    { "title": "Lampe", "emoji": "💡" },
+    { "title": "Schrank", "emoji": "🗄️" },
+    { "title": "Toilette", "emoji": "🚽" },
+    { "title": "Dusche", "emoji": "🚿" },
+    { "title": "Gabel", "emoji": "🍴" },
+    { "title": "Löffel", "emoji": "🥄" },
+    { "title": "Messer", "emoji": "🔪" },
+    { "title": "Telefon", "emoji": "📱" }
+  ],
+  "Verben (Tätigkeiten) (Emoji)": [
+    { "title": "essen", "emoji": "😋" },
+    { "title": "trinken", "emoji": "🥤" },
+    { "title": "schlafen", "emoji": "😴" },
+    { "title": "laufen", "emoji": "🏃" },
+    { "title": "lesen", "emoji": "📖" },
+    { "title": "schreiben", "emoji": "✍️" },
+    { "title": "malen", "emoji": "🎨" },
+    { "title": "singen", "emoji": "🎤" },
+    { "title": "tanzen", "emoji": "💃" },
+    { "title": "kochen", "emoji": "🍳" },
+    { "title": "spielen", "emoji": "🎲" },
+    { "title": "putzen", "emoji": "🧹" }
+  ],
+  "Orte & Gebäude (Emoji)": [
+    { "title": "Haus", "emoji": "🏠" },
+    { "title": "Schule", "emoji": "🏫" },
+    { "title": "Krankenhaus", "emoji": "🏥" },
+    { "title": "Supermarkt", "emoji": "🛒" },
+    { "title": "Spielplatz", "emoji": "🛝" },
+    { "title": "Wald", "emoji": "🌲" },
+    { "title": "Strand", "emoji": "🏖️" },
+    { "title": "Berg", "emoji": "⛰️" },
+    { "title": "Kirche", "emoji": "⛪" },
+    { "title": "Bahnhof", "emoji": "🚉" },
+    { "title": "Flughafen", "emoji": "✈️" }
+  ],
+  "Wetter (Emoji)": [
+    { "title": "Sonne", "emoji": "☀️" },
+    { "title": "Wolke", "emoji": "☁️" },
+    { "title": "Regen", "emoji": "🌧️" },
+    { "title": "Schnee", "emoji": "❄️" },
+    { "title": "Wind", "emoji": "🌬️" },
+    { "title": "Blitz", "emoji": "⚡" },
+    { "title": "Regenbogen", "emoji": "🌈" }
+  ],
+  "Gefühle (Emoji)": [
+    { "title": "glücklich", "emoji": "😊" },
+    { "title": "traurig", "emoji": "😢" },
+    { "title": "wütend", "emoji": "😠" },
+    { "title": "überrascht", "emoji": "😮" },
+    { "title": "ängstlich", "emoji": "😨" },
+    { "title": "müde", "emoji": "😴" },
+    { "title": "verliebt", "emoji": "🥰" },
+    { "title": "lustig", "emoji": "😂" }
+  ],
+  "Schulsachen (Emoji)": [
+    { "title": "Buch", "emoji": "📖" },
+    { "title": "Stift", "emoji": "✏️" },
+    { "title": "Heft", "emoji": "📓" },
+    { "title": "Schere", "emoji": "✂️" },
+    { "title": "Rucksack", "emoji": "🎒" },
+    { "title": "Tafel", "emoji": "칠" },
+    { "title": "Kleber", "emoji": "🧴" },
+    { "title": "Lineal", "emoji": "📏" }
   ]
 }
