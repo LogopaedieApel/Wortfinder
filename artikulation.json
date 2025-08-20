@@ -77,18 +77,6 @@
     { "title": "drücken", "emoji": "👇" },
     { "title": "Drucker", "emoji": "🖨️" }
   ],
-  "F final (Emoji)": [
-    { "title": "Brief", "emoji": "💌" },
-    { "title": "fünf", "emoji": "5️⃣" },
-    { "title": "Kopf", "emoji": "🧠" },
-    { "title": "Saft", "emoji": "🧃" },
-    { "title": "Schaf", "emoji": "🐑" },
-    { "title": "Schiff", "emoji": "🚢" },
-    { "title": "Senf", "emoji": "🌭" },
-    { "title": "Stift", "emoji": "✏️" },
-    { "title": "tief", "emoji": "🌊" },
-    { "title": "Wolf", "emoji": "🐺" }
-  ],
   "F initial (Emoji)": [
     { "title": "Fahne", "emoji": "🏳️" },
     { "title": "Fahrrad", "emoji": "🚲" },
@@ -118,6 +106,18 @@
     { "title": "Löffel", "emoji": "🥄" },
     { "title": "Ofen", "emoji": "🍳" },
     { "title": "surfen", "emoji": "🏄" }
+  ],
+  "F final (Emoji)": [
+    { "title": "Brief", "emoji": "💌" },
+    { "title": "fünf", "emoji": "5️⃣" },
+    { "title": "Kopf", "emoji": "🧠" },
+    { "title": "Saft", "emoji": "🧃" },
+    { "title": "Schaf", "emoji": "🐑" },
+    { "title": "Schiff", "emoji": "🚢" },
+    { "title": "Senf", "emoji": "🌭" },
+    { "title": "Stift", "emoji": "✏️" },
+    { "title": "tief", "emoji": "🌊" },
+    { "title": "Wolf", "emoji": "🐺" }
   ],
   "G initial (Emoji)": [
     { "title": "Gabel", "emoji": "🍴" },
@@ -158,20 +158,6 @@
     { "title": "Gruppe", "emoji": "👨‍👩‍👧‍👦" },
     { "title": "gruselig", "emoji": "👻" }
   ],
-  "K final (Emoji)": [
-    { "title": "Bank", "emoji": "🪙💵🏦" },
-    { "title": "Berg", "emoji": "🏔️" },
-    { "title": "Besteck", "emoji": "🍴" },
-    { "title": "Bock", "emoji": "🐏" },
-    { "title": "dick", "emoji": "🫄" },
-    { "title": "krank", "emoji": "🤒" },
-    { "title": "Musik", "emoji": "🎶🎸" },
-    { "title": "Sack", "emoji": "💰" },
-    { "title": "stark", "emoji": "🏋️" },
-    { "title": "Stock", "emoji": "🦯" },
-    { "title": "Stück", "emoji": "🍕" },
-    { "title": "Zug", "emoji": "🚂🚃" }
-  ],
   "K initial (Emoji)": [
     { "title": "Käfer", "emoji": "🪲" },
     { "title": "Käse", "emoji": "🧀" },
@@ -204,6 +190,20 @@
     { "title": "Wecker", "emoji": "⏰" },
     { "title": "Wolke", "emoji": "☁️" }
   ],
+  "K final (Emoji)": [
+    { "title": "Bank", "emoji": "🪙💵🏦" },
+    { "title": "Berg", "emoji": "🏔️" },
+    { "title": "Besteck", "emoji": "🍴" },
+    { "title": "Bock", "emoji": "🐏" },
+    { "title": "dick", "emoji": "🫄" },
+    { "title": "krank", "emoji": "🤒" },
+    { "title": "Musik", "emoji": "🎶🎸" },
+    { "title": "Sack", "emoji": "💰" },
+    { "title": "stark", "emoji": "🏋️" },
+    { "title": "Stock", "emoji": "🦯" },
+    { "title": "Stück", "emoji": "🍕" },
+    { "title": "Zug", "emoji": "🚂🚃" }
+  ],
   "KR initial (Emoji)": [
     { "title": "Krabbe", "emoji": "🦀" },
     { "title": "Kran", "emoji": "🏗️" },
@@ -229,17 +229,6 @@
     { "title": "Lutscher", "emoji": "🍭" },
     { "title": "Lupe", "emoji": "🔍" }
   ],
-  "M final (Emoji)": [
-    { "title": "Arm", "emoji": "💪" },
-    { "title": "Baum", "emoji": "🌳" },
-    { "title": "Daumen", "emoji": "👍" },
-    { "title": "Helm", "emoji": "🪖" },
-    { "title": "Kamm", "emoji": "🪮" },
-    { "title": "Schirm", "emoji": "☂️" },
-    { "title": "schwimmen", "emoji": "🏊" },
-    { "title": "Turm", "emoji": "🗼" },
-    { "title": "Wurm", "emoji": "🪱" }
-  ],
   "M initial (Emoji)": [
     { "title": "malen", "emoji": "🎨" },
     { "title": "Maus", "emoji": "🐭" },
@@ -264,6 +253,17 @@
     { "title": "Tomate", "emoji": "🍅" },
     { "title": "Zimmer", "emoji": "🛋️" }
   ],
+  "M final (Emoji)": [
+    { "title": "Arm", "emoji": "💪" },
+    { "title": "Baum", "emoji": "🌳" },
+    { "title": "Daumen", "emoji": "👍" },
+    { "title": "Helm", "emoji": "🪖" },
+    { "title": "Kamm", "emoji": "🪮" },
+    { "title": "Schirm", "emoji": "☂️" },
+    { "title": "schwimmen", "emoji": "🏊" },
+    { "title": "Turm", "emoji": "🗼" },
+    { "title": "Wurm", "emoji": "🪱" }
+  ],
   "N initial (Emoji)": [
     { "title": "nachdenken", "emoji": "🤔" },
     { "title": "Nacht", "emoji": "🌃" },
@@ -277,13 +277,6 @@
     { "title": "Nudeln", "emoji": "🍝" },
     { "title": "null", "emoji": "0️⃣" },
     { "title": "Nuss", "emoji": "🥜" }
-  ],
-  "P final (Emoji)": [
-    { "title": "Galopp", "emoji": "🏇" },
-    { "title": "Jeep", "emoji": "🚙" },
-    { "title": "Sirup", "emoji": "🍁" },
-    { "title": "Stopp", "emoji": "🛑" },
-    { "title": "Tipp", "emoji": "💡" }
   ],
   "P initial (Emoji)": [
     { "title": "Paket", "emoji": "📦" },
@@ -312,6 +305,13 @@
     { "title": "Teppich", "emoji": "🧶" },
     { "title": "Treppe", "emoji": "🪜" },
     { "title": "Trompete", "emoji": "🎺" }
+  ],
+  "P final (Emoji)": [
+    { "title": "Galopp", "emoji": "🏇" },
+    { "title": "Jeep", "emoji": "🚙" },
+    { "title": "Sirup", "emoji": "🍁" },
+    { "title": "Stopp", "emoji": "🛑" },
+    { "title": "Tipp", "emoji": "💡" }
   ],
   "R initial (Emoji)": [
     { "title": "Rakete", "emoji": "🚀" },
@@ -349,21 +349,6 @@
     { "title": "Tiere", "emoji": "🐕🐈‍⬛🐄🦆" },
     { "title": "traurig", "emoji": "😥" }
   ],
-  "S final (Emoji)": [
-    { "title": "Bus", "emoji": "🚌" },
-    { "title": "eins", "emoji": "1️⃣" },
-    { "title": "Eis", "emoji": "🍨" },
-    { "title": "Fuchs", "emoji": "🦊" },
-    { "title": "Fuß", "emoji": "🦶" },
-    { "title": "heiß", "emoji": "🥵" },
-    { "title": "Herz", "emoji": "♥️" },
-    { "title": "Mais", "emoji": "🌽" },
-    { "title": "Maus", "emoji": "🐭" },
-    { "title": "Pilz", "emoji": "🍄" },
-    { "title": "Pommes", "emoji": "🍟" },
-    { "title": "Reis", "emoji": "🍚" },
-    { "title": "weiß", "emoji": "⬜" }
-  ],
   "S initial (Emoji)": [
     { "title": "Saft", "emoji": "🧃" },
     { "title": "Säge", "emoji": "🪚" },
@@ -392,6 +377,21 @@
     { "title": "Rose", "emoji": "🌹" },
     { "title": "Schlüssel", "emoji": "🗝️" },
     { "title": "Wasser", "emoji": "🍶💦" }
+  ],
+  "S final (Emoji)": [
+    { "title": "Bus", "emoji": "🚌" },
+    { "title": "eins", "emoji": "1️⃣" },
+    { "title": "Eis", "emoji": "🍨" },
+    { "title": "Fuchs", "emoji": "🦊" },
+    { "title": "Fuß", "emoji": "🦶" },
+    { "title": "heiß", "emoji": "🥵" },
+    { "title": "Herz", "emoji": "♥️" },
+    { "title": "Mais", "emoji": "🌽" },
+    { "title": "Maus", "emoji": "🐭" },
+    { "title": "Pilz", "emoji": "🍄" },
+    { "title": "Pommes", "emoji": "🍟" },
+    { "title": "Reis", "emoji": "🍚" },
+    { "title": "weiß", "emoji": "⬜" }
   ],
   "SCH initial (Emoji)": [
     { "title": "Schaf", "emoji": "🐑" },
@@ -423,27 +423,6 @@
     { "title": "Taschen", "emoji": "🛍️" },
     { "title": "Taschenlampe", "emoji": "🔦" }
   ],
-  "T final (Emoji)": [
-    { "title": "acht", "emoji": "8" },
-    { "title": "Arzt", "emoji": "🧑‍⚕️💉" },
-    { "title": "Bett", "emoji": "🛏️" },
-    { "title": "Brot", "emoji": "🍞🥖" },
-    { "title": "Elefant", "emoji": "🐘" },
-    { "title": "Geist", "emoji": "👻" },
-    { "title": "Gesicht", "emoji": "😱" },
-    { "title": "Hand", "emoji": "👋" },
-    { "title": "Hut", "emoji": "🎩" },
-    { "title": "Licht", "emoji": "💡" },
-    { "title": "Nacht", "emoji": "🌃" },
-    { "title": "Nest", "emoji": "🪹" },
-    { "title": "Paket", "emoji": "📦" },
-    { "title": "Saft", "emoji": "🧃" },
-    { "title": "Salat", "emoji": "🥗" },
-    { "title": "Wald", "emoji": "🌳🌳" },
-    { "title": "Wort", "emoji": "🆕" },
-    { "title": "wütend", "emoji": "😡" },
-    { "title": "Zeit", "emoji": "⌛⌚" }
-  ],
   "T initial (Emoji)": [
     { "title": "Taschen", "emoji": "🛍️" },
     { "title": "Tasse", "emoji": "☕" },
@@ -473,6 +452,27 @@
     { "title": "Schmetterling", "emoji": "🦋" },
     { "title": "Spaghetti", "emoji": "🍝" },
     { "title": "Wüste", "emoji": "🏜️" }
+  ],
+  "T final (Emoji)": [
+    { "title": "acht", "emoji": "8" },
+    { "title": "Arzt", "emoji": "🧑‍⚕️💉" },
+    { "title": "Bett", "emoji": "🛏️" },
+    { "title": "Brot", "emoji": "🍞🥖" },
+    { "title": "Elefant", "emoji": "🐘" },
+    { "title": "Geist", "emoji": "👻" },
+    { "title": "Gesicht", "emoji": "😱" },
+    { "title": "Hand", "emoji": "👋" },
+    { "title": "Hut", "emoji": "🎩" },
+    { "title": "Licht", "emoji": "💡" },
+    { "title": "Nacht", "emoji": "🌃" },
+    { "title": "Nest", "emoji": "🪹" },
+    { "title": "Paket", "emoji": "📦" },
+    { "title": "Saft", "emoji": "🧃" },
+    { "title": "Salat", "emoji": "🥗" },
+    { "title": "Wald", "emoji": "🌳🌳" },
+    { "title": "Wort", "emoji": "🆕" },
+    { "title": "wütend", "emoji": "😡" },
+    { "title": "Zeit", "emoji": "⌛⌚" }
   ],
   "TR initial (Emoji)": [
     { "title": "tragen", "emoji": "💪" },
