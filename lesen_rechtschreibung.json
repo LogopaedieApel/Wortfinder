@@ -1,5 +1,18 @@
 {
   "Wörter mit 'mm'": ["Sommer", "Nummer", "Flamme", "kommen", "Stimme", "Himmel", "immer", "Lamm", "Kamm", "Damm"],
   "Wörter mit 'tt'": ["Mitte", "Schatten", "bitte", "Mutter", "Butter", "Kette", "Wetter", "Blatt", "Gitter", "Schritt"],
-  "Wörter mit 'ck'": ["Rücken", "Jacke", "Decke", "Zucker", "Socke", "locken", "drücken", "wecken", "Mücke", "Schnecke"]
- }
+  "Wörter mit 'ck'": ["Rücken", "Jacke", "Decke", "Zucker", "Socke", "locken", "drücken", "wecken", "Mücke", "Schnecke"],
+  "Wörter mit 'ah'": ["Ahnung", "Ausnahme", "Bahn", "befahl", "bezahlen", "erfahren", "fahren", "Fahrrad", "Gefahr", "Jahr", "mahlen", "nah", "nahm", "Rahmen", "sah", "strahlen", "wahr", "Wahrheit", "Zahl", "Zahn"],
+  "Wörter mit 'aa'": ["Aal", "Haar", "Paar", "paar", "Saal", "Saat", "Staat", "Waage"],
+  "Wörter mit 'äh'": ["ähnlich", "allmählich", "erzählen", "Erzählung", "fährt", "Fähre", "gefährlich", "gähnen", "krähen", "mähen", "nähen", "Nähe", "ungefähr", "wählen", "während", "Zähne", "zähe", "zählen", "ernähren", "erwähnen"],
+  "Wörter mit 'eh'": ["bestehen", "drehen", "Ehre", "ehren", "ehrlich", "empfehlen", "fehlen", "Fehler", "Feuerwehr", "gehen", "kehren", "lehren", "mehr", "nehmen", "sehen", "sehr", "stehen", "verstehen", "wehren", "Wiedersehen", "zehn"],
+  "Wörter mit 'ee'": ["Beere", "Beet", "Fee", "Heer", "Idee", "Kaffee", "Klee", "leer", "leeren", "Meer", "Moschee", "Schnee", "See", "Seele", "Speer", "Tee"],
+  "Wörter mit 'eih'": ["einreihen", "Geweih", "leihen", "Reihe", "verzeihen", "Weihnachten"],
+  "Wörter mit 'ih'": ["ihm", "ihn", "ihnen", "ihr", "ihre"],
+  "Wörter mit 'ieh'": ["anziehen", "ausziehen", "befehlen", "empfehlen", "fliehen", "geschehen", "leihen", "sieh", "sieht", "stehlen", "verzeihen", "Vieh", "ziehen"],
+  "Wörter mit 'oh'": ["befohlen", "bohren", "empfohlen", "Fohlen", "froh", "gestohlen", "hohl", "Kohl", "Lohn", "lohnen", "Ohr", "ohne", "Rohr", "Sohn", "Sohle", "Stroh", "wohl", "wohnen", "Wohnung", "obwohl"],
+  "Wörter mit 'oo'": ["Boot", "doof", "Moor", "Moos", "Zoo"],
+  "Wörter mit 'öh'": ["aushöhlen", "fröhlich", "gewöhnen", "Höhe", "höher", "Höhle", "höhnen", "Löhne", "Möhre", "Röhre", "Söhne", "stöhnen"],
+  "Wörter mit 'uh'": ["Ausfuhr", "erfuhr", "fuhr", "fuhren", "Hausschuh", "Huhn", "Kuh", "muhen", "Ruhe", "ruhig", "Ruhm", "Schuh", "Stuhl", "Uhr"],
+  "Wörter mit 'üh'": ["ausführen", "berühmt", "blühen", "Bühne", "fühlen", "führen", "Frühling", "Frühstück", "Gefühl", "Huhn", "Kuh", "Kühe", "kühl", "Mühe", "Mühle", "rühren", "Stuhl", "Stühle", "wühlen", "früh"]
+}
