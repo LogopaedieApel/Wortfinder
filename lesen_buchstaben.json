@@ -1,0 +1,7 @@
+{
+  "Buchstaben Plosive": ["P", "B", "T", "D", "K", "G"],
+  "Buchstaben Frikative": ["SCH", "ch", "S", "F"],
+  "Buchstaben Sonorante": ["L", "R", "M", "N", "W"],
+  "Selbstlaute + Umlaute": ["A", "E", "I", "O", "U", "Ä", "Ö", "Ü"],
+  "Doppellaute": ["AU", "EI", "AI", "EU", "ÄU"]
+}
